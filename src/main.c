@@ -4,6 +4,9 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
+static const GLfloat g_vertex_buffer_data[] = {-1.0f, -1.0f, 0.0f, 1.0f, -1.0f,
+                                               0.0f,  0.0f,  1.0f, 0.0f};
+
 int main() {
   glewExperimental = GL_TRUE;
 
@@ -26,6 +29,16 @@ int main() {
     return -1;
   }
 
+  GLuint vao;
+  glGenVertexArrays(1, &vao);
+  glBindVertexArray(vao);
+
+  GLuint vertexbuffer;
+  glGenBuffers(1, &vertexbuffer);
+  glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(g_vertex_buffer_data),
+               g_vertex_buffer_data, GL_STATIC_DRAW);
+
   glfwMakeContextCurrent(window);
   glewExperimental = GL_TRUE;
   if (glewInit() != GLEW_OK) {
@@ -36,6 +49,13 @@ int main() {
   glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
   do {
     glClear(GL_COLOR_BUFFER_BIT);
+
+    glEnableVertexAttribArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void *)0);
+
+    glDrawArrays(GL_TRIANGLES, 0, 3);
+    glDisableVertexAttribArray(0);
 
     glfwSwapBuffers(window);
     glfwPollEvents();
