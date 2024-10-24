@@ -4,8 +4,24 @@
 #include <GL/gl.h>
 #include <GLFW/glfw3.h>
 #include <stdio.h>
+#include <string.h>
 
-float vertices[] = {-0.5f, -0.5f, 0.0f, 0.5f, -0.5f, 0.0f, 0.0f, 0.5f, 0.0f};
+#define WIN_WIDTH 800
+#define WIN_HEIGHT 600
+
+float vertices[] = {
+    // first triangle
+    0.5f,  0.5f,  0.0f, // top right
+    0.5f,  -0.5f, 0.0f, // bottom right
+    -0.5f, 0.5f,  0.0f, // top left
+    -0.5f, -0.5f, 0.0f  // bottom left
+};
+
+unsigned int indices[] = {
+    0, 1, 3, // first triangle
+    0, 2, 3  // second triangle
+};
+
 const char *vertexShaderSource =
     "#version 330 core\n"
     "layout (location = 0) in vec3 aPos;\n"
@@ -13,6 +29,7 @@ const char *vertexShaderSource =
     "{\n"
     " gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
     "}\0";
+
 const char *fragmentShaderSource =
     "#version 330 core\n"
     "out vec4 FragColor;\n"
@@ -30,7 +47,7 @@ void processInput(GLFWwindow *window) {
     glfwSetWindowShouldClose(window, GLFW_TRUE);
 }
 
-int main() {
+int main(int argc, char **argv) {
   if (!glfwInit()) {
     fprintf(stderr, "[Error] [GLFW] Failed to init glfw\n");
     exit(EXIT_FAILURE);
@@ -39,7 +56,8 @@ int main() {
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-  GLFWwindow *window = glfwCreateWindow(800, 600, "engine", NULL, NULL);
+  GLFWwindow *window =
+      glfwCreateWindow(WIN_WIDTH, WIN_HEIGHT, "engine", NULL, NULL);
   if (window == NULL) {
     fprintf(stderr, "[Error] [GLFW] Failed to create window\n");
     glfwTerminate();
@@ -51,14 +69,9 @@ int main() {
   glewInit();
 
   glfwSetFramebufferSizeCallback(window, frame_buffer_size_callback);
-  glViewport(0, 0, 800, 600);
+  glViewport(0, 0, WIN_WIDTH, WIN_HEIGHT);
 
-  // shader stuff
-  unsigned int VBO;
-  glGenBuffers(1, &VBO);
-  glBindBuffer(GL_ARRAY_BUFFER, VBO);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
+  // vertex shader
   unsigned int vertexShader;
   vertexShader = glCreateShader(GL_VERTEX_SHADER);
   glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
@@ -73,6 +86,7 @@ int main() {
             infoLog);
   }
 
+  // fragment shader
   unsigned int fragmentShader;
   fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
   glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
@@ -86,6 +100,7 @@ int main() {
             infoLog);
   }
 
+  // shader linking
   unsigned int shaderProgram;
   shaderProgram = glCreateProgram();
   glAttachShader(shaderProgram, vertexShader);
@@ -98,10 +113,34 @@ int main() {
     fprintf(stderr, "[Error] [shaderLinking] Shader linking failed\n%s\n",
             infoLog);
   }
-  glUseProgram(shaderProgram);
 
   glDeleteShader(vertexShader);
   glDeleteShader(fragmentShader);
+
+  // buffer and array objects
+  unsigned int VBO, VAO, EBO;
+  glGenVertexArrays(1, &VAO);
+  glGenBuffers(1, &VBO);
+  glGenBuffers(1, &EBO);
+
+  glBindVertexArray(VAO);
+
+  glBindBuffer(GL_ARRAY_BUFFER, VBO);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices,
+               GL_STATIC_DRAW);
+
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
+  glEnableVertexAttribArray(0);
+
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+  glBindVertexArray(0);
+
+  if (argc == 2)
+    if (strcmp(argv[1], " -w"))
+      glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
   // main loop
   while (!glfwWindowShouldClose(window)) {
@@ -112,10 +151,20 @@ int main() {
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
+    glUseProgram(shaderProgram);
+    glBindVertexArray(VAO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    glBindVertexArray(0);
+
     // check all events and swap buffers
     glfwSwapBuffers(window);
     glfwPollEvents();
   }
+
+  glDeleteVertexArrays(1, &VAO);
+  glDeleteBuffers(1, &VBO);
+  glDeleteProgram(shaderProgram);
 
   glfwTerminate();
   return 0;
