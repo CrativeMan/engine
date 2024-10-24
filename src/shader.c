@@ -5,10 +5,16 @@
 #include <GLFW/glfw3.h>
 #include <stdio.h>
 
+#include "header/fileHandler.h"
+#include "header/logger.h"
 #include "header/shader.h"
 
-unsigned int createShader(const char *vShaderSource,
-                          const char *fShaderSource) {
+unsigned int createShader(char *vShaderPath, char *fShaderPath) {
+  // vertex shader
+  const char *vShaderSource = readFile(vShaderPath);
+  if (vShaderSource == NULL) {
+    exit(EXIT_FAILURE);
+  }
   unsigned int vShader;
   vShader = glCreateShader(GL_VERTEX_SHADER);
   glShaderSource(vShader, 1, &vShaderSource, NULL);
@@ -19,10 +25,15 @@ unsigned int createShader(const char *vShaderSource,
   glGetShaderiv(vShader, GL_COMPILE_STATUS, &success);
   if (!success) {
     glGetShaderInfoLog(vShader, 512, NULL, infoLog);
-    fprintf(stderr, "[Error] [vShader] Vertex shader compilation failed\n%s\n",
-            infoLog);
+    loggerError("vShader", "Vertex shader compilation failed\n");
+    printf("%s\n", infoLog);
   }
 
+  // fragment shader
+  const char *fShaderSource = readFile(fShaderPath);
+  if (fShaderSource == NULL) {
+    exit(EXIT_FAILURE);
+  }
   unsigned int fShader;
   fShader = glCreateShader(GL_FRAGMENT_SHADER);
   glShaderSource(fShader, 1, &fShaderSource, NULL);
@@ -31,9 +42,8 @@ unsigned int createShader(const char *vShaderSource,
   glGetShaderiv(fShader, GL_COMPILE_STATUS, &success);
   if (!success) {
     glGetShaderInfoLog(fShader, 512, NULL, infoLog);
-    fprintf(stderr,
-            "[Error] [fShader] Fragment shader compilation failed\n%s\n",
-            infoLog);
+    loggerError("fShader", "Fragment shader compilation failed");
+    printf("%s\n", infoLog);
   }
 
   // shader linking
@@ -46,11 +56,15 @@ unsigned int createShader(const char *vShaderSource,
   glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
   if (!success) {
     glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
-    fprintf(stderr, "[Error] [shaderLinking] Shader linking failed\n%s\n",
-            infoLog);
+    loggerError("ShaderProgram", "Shader linking failed");
+    printf("%s\n", infoLog);
   }
 
   glDeleteShader(vShader);
   glDeleteShader(fShader);
   return shaderProgram;
+}
+
+void setFloat(unsigned int id, char *uniform, float value) {
+  glUniform1f(glGetUniformLocation(id, uniform), value);
 }

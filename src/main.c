@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "header/logger.h"
 #include "header/main.h"
 #include "header/shader.h"
 
@@ -23,24 +24,6 @@ float vertices[] = {
 };
 
 unsigned int indices[] = {0, 1, 2};
-
-const char *vertexShaderSource = "#version 330 core\n"
-                                 "layout (location = 0) in vec3 aPos;\n"
-                                 "layout (location = 1) in vec3 aColor;\n"
-                                 "out vec3 ourColor;\n"
-                                 "void main()\n"
-                                 "{\n"
-                                 " gl_Position = vec4(aPos, 1.0);\n"
-                                 " ourColor = aColor;\n"
-                                 "}\0";
-
-const char *fragmentShaderSource = "#version 330 core\n"
-                                   "out vec4 FragColor;\n"
-                                   "in vec3 ourColor;\n"
-                                   "void main()\n"
-                                   "{\n"
-                                   " FragColor = vec4(ourColor, 1.0);\n"
-                                   "}\0";
 
 void frame_buffer_size_callback(GLFWwindow *window, int width, int height) {
   glViewport(0, 0, width, height);
@@ -62,7 +45,7 @@ void render(unsigned int *VAO, unsigned int *EBO) {
 
 void init() {
   if (!glfwInit()) {
-    fprintf(stderr, "[Error] [GLFW] Failed to init glfw\n");
+    loggerError("GLFW", "Failed to init glfw");
     exit(EXIT_FAILURE);
   }
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -71,7 +54,7 @@ void init() {
 
   global.window = glfwCreateWindow(WIN_WIDTH, WIN_HEIGHT, "engine", NULL, NULL);
   if (global.window == NULL) {
-    fprintf(stderr, "[Error] [GLFW] Failed to create window\n");
+    loggerError("GLFW", "Failed to create window");
     glfwTerminate();
     exit(EXIT_FAILURE);
   }
@@ -88,7 +71,8 @@ int main(int argc, char **argv) {
   init();
 
   // create shader
-  global.shaderProgram = createShader(vertexShaderSource, fragmentShaderSource);
+  global.shaderProgram =
+      createShader("src/shaders/vertex.glsl", "src/shaders/fragment.glsl");
 
   // buffer and array objects
   unsigned int VBO, VAO, EBO;
