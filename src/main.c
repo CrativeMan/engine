@@ -11,6 +11,8 @@
 #include "header/main.h"
 #include "header/shader.h"
 
+#define ID "Engine"
+
 // global variables for accessing in the entire program
 typedef struct {
   GLFWwindow *window;
@@ -85,6 +87,8 @@ void init() {
   // resize stuff
   glfwSetFramebufferSizeCallback(global.window, frame_buffer_size_callback);
   glViewport(0, 0, WIN_WIDTH, WIN_HEIGHT);
+
+  loggerInfo(ID, "Initialized game engine");
 }
 
 int main(int argc, char **argv) {
@@ -95,6 +99,7 @@ int main(int argc, char **argv) {
       createShader("src/shaders/vertex.glsl", "src/shaders/fragment.glsl");
   global.texture[0] = loadImage("src/textures/wall.jpg");
   global.texture[1] = loadImage("src/textures/awesomeface.png");
+  loggerInfo(ID, "Created shader and images");
 
   // buffer and array objects
   unsigned int VBO, VAO, EBO;
@@ -137,6 +142,7 @@ int main(int argc, char **argv) {
   glUniform1i(glGetUniformLocation(global.shaderProgram, "texture1"), 0);
   setInt(global.shaderProgram, "texture2", 1);
 
+  loggerInfo(ID, "Started game loop");
   // main loop
   while (!glfwWindowShouldClose(global.window)) {
     // input
@@ -155,6 +161,7 @@ int main(int argc, char **argv) {
   glDeleteBuffers(1, &VBO);
   glDeleteProgram(global.shaderProgram);
 
+  loggerInfo(ID, "Exit engine");
   glfwTerminate();
   return 0;
 }
