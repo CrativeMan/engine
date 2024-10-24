@@ -15,7 +15,7 @@
 typedef struct {
   GLFWwindow *window;
   unsigned int shaderProgram;
-  unsigned int texture; // XXX temp
+  unsigned int texture[2]; // XXX temp
 } Global;
 Global global;
 
@@ -51,7 +51,10 @@ void render(unsigned int *VAO, unsigned int *EBO) {
   glClear(GL_COLOR_BUFFER_BIT);
 
   // use specific texture
-  glBindTexture(GL_TEXTURE_2D, global.texture);
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, global.texture[0]);
+  glActiveTexture(GL_TEXTURE1);
+  glBindTexture(GL_TEXTURE_2D, global.texture[1]);
   glBindVertexArray(*VAO);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, *EBO);
   glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
@@ -82,13 +85,6 @@ void init() {
   // resize stuff
   glfwSetFramebufferSizeCallback(global.window, frame_buffer_size_callback);
   glViewport(0, 0, WIN_WIDTH, WIN_HEIGHT);
-
-  // texture sampling parameters
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
-                  GL_LINEAR_MIPMAP_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 }
 
 int main(int argc, char **argv) {
@@ -97,7 +93,8 @@ int main(int argc, char **argv) {
   // create shader
   global.shaderProgram =
       createShader("src/shaders/vertex.glsl", "src/shaders/fragment.glsl");
-  global.texture = loadImage("src/textures/wall.jpg");
+  global.texture[0] = loadImage("src/textures/wall.jpg");
+  global.texture[1] = loadImage("src/textures/awesomeface.png");
 
   // buffer and array objects
   unsigned int VBO, VAO, EBO;
@@ -137,6 +134,8 @@ int main(int argc, char **argv) {
 
   // enable shader
   glUseProgram(global.shaderProgram);
+  glUniform1i(glGetUniformLocation(global.shaderProgram, "texture1"), 0);
+  setInt(global.shaderProgram, "texture2", 1);
 
   // main loop
   while (!glfwWindowShouldClose(global.window)) {

@@ -65,6 +65,10 @@ unsigned int createShader(char *vShaderPath, char *fShaderPath) {
   return shaderProgram;
 }
 
+void setInt(unsigned int id, char *uniform, int value) {
+  glUniform1i(glGetUniformLocation(id, uniform), value);
+}
+
 void setFloat(unsigned int id, char *uniform, float value) {
   glUniform1f(glGetUniformLocation(id, uniform), value);
 }
