@@ -1,6 +1,6 @@
 CC = gcc
 CFLAGS = -Wall -Wextra -pedantic -std=c99
-LDFLAGS = -lGL -lglfw -lGLEW
+LDFLAGS = -lGL -lglfw -lGLEW -lm
 SRCDIR = src
 OBJDIR = obj
 SRCS = $(wildcard $(SRCDIR)/*.c)
