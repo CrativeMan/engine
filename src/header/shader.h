@@ -2,7 +2,7 @@
 #define SHADER_H
 
 unsigned int createShader(char *vShaderPath, char *fShaderPath);
-void setFloat(unsigned int id, char *uniform, float value);
-void setInt(unsigned int id, char *uniform, int value);
+void shaderSetFloat(unsigned int id, char *uniform, float value);
+void shaderSetInt(unsigned int id, char *uniform, int value);
 
 #endif // SHADER_H

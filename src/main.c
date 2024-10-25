@@ -3,6 +3,7 @@
 
 #include <GL/gl.h>
 #include <GLFW/glfw3.h>
+#include <math.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -17,9 +18,15 @@
 typedef struct {
   GLFWwindow *window;
   unsigned int shaderProgram;
-  unsigned int texture[2]; // XXX temp
+  unsigned int textures[2]; // XXX temp
 } Global;
 Global global;
+
+typedef struct {
+  unsigned int VBO;
+  unsigned int VAO;
+  unsigned int EBO;
+} Mesh;
 
 float vertices[] = {
     // positions          // colors           // texture coords
@@ -31,12 +38,6 @@ float vertices[] = {
 
 unsigned int indices[] = {0, 1, 3, 1, 2, 3};
 
-float texCoords[] = {
-    0.0f, 0.0f, // lower-left corner
-    1.0f, 0.0f, // lower-right corner
-    0.5f, 1.0f  // top-center corner
-};
-
 // when window is resized
 void frame_buffer_size_callback(GLFWwindow *window, int width, int height) {
   glViewport(0, 0, width, height);
@@ -47,18 +48,22 @@ void processInput(GLFWwindow *window) {
     glfwSetWindowShouldClose(window, GLFW_TRUE);
 }
 
-void render(unsigned int *VAO, unsigned int *EBO) {
+void render(Mesh *mesh) {
   // draw background
   glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT);
 
+  float timeValue = glfwGetTime();
+  float sin = sinf(timeValue) / 2.0f + 0.5f;
+  shaderSetFloat(global.shaderProgram, "sin", sin);
+
   // use specific texture
   glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_2D, global.texture[0]);
+  glBindTexture(GL_TEXTURE_2D, global.textures[0]);
   glActiveTexture(GL_TEXTURE1);
-  glBindTexture(GL_TEXTURE_2D, global.texture[1]);
-  glBindVertexArray(*VAO);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, *EBO);
+  glBindTexture(GL_TEXTURE_2D, global.textures[1]);
+  glBindVertexArray(mesh->VAO);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->EBO);
   glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
@@ -97,22 +102,22 @@ int main(int argc, char **argv) {
   // create shader
   global.shaderProgram =
       createShader("src/shaders/vertex.glsl", "src/shaders/fragment.glsl");
-  global.texture[0] = loadImage("src/textures/wall.jpg");
-  global.texture[1] = loadImage("src/textures/awesomeface.png");
+  global.textures[0] = loadImage("src/textures/wall.jpg");
+  global.textures[1] = loadImage("src/textures/awesomeface.png");
   loggerInfo(ID, "Created shader and images");
 
   // buffer and array objects
-  unsigned int VBO, VAO, EBO;
-  glGenVertexArrays(1, &VAO);
-  glGenBuffers(1, &VBO);
-  glGenBuffers(1, &EBO);
+  Mesh mesh;
+  glGenVertexArrays(1, &mesh.VAO);
+  glGenBuffers(1, &mesh.VBO);
+  glGenBuffers(1, &mesh.EBO);
 
-  glBindVertexArray(VAO);
+  glBindVertexArray(mesh.VAO);
 
-  glBindBuffer(GL_ARRAY_BUFFER, VBO);
+  glBindBuffer(GL_ARRAY_BUFFER, mesh.VBO);
   glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.EBO);
   glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices,
                GL_STATIC_DRAW);
 
@@ -140,7 +145,7 @@ int main(int argc, char **argv) {
   // enable shader
   glUseProgram(global.shaderProgram);
   glUniform1i(glGetUniformLocation(global.shaderProgram, "texture1"), 0);
-  setInt(global.shaderProgram, "texture2", 1);
+  shaderSetInt(global.shaderProgram, "texture2", 1);
 
   loggerInfo(ID, "Started game loop");
   // main loop
@@ -149,7 +154,7 @@ int main(int argc, char **argv) {
     processInput(global.window);
 
     // rendering
-    render(&VAO, &EBO);
+    render(&mesh);
 
     // check all events and swap buffers
     glfwSwapBuffers(global.window);
@@ -157,8 +162,8 @@ int main(int argc, char **argv) {
   }
 
   // cleanup
-  glDeleteVertexArrays(1, &VAO);
-  glDeleteBuffers(1, &VBO);
+  glDeleteVertexArrays(1, &mesh.VAO);
+  glDeleteBuffers(1, &mesh.VBO);
   glDeleteProgram(global.shaderProgram);
 
   loggerInfo(ID, "Exit engine");
