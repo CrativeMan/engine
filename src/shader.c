@@ -9,6 +9,8 @@
 #include "header/logger.h"
 #include "header/shader.h"
 
+#define ID "Shader"
+
 unsigned int createShader(char *vShaderPath, char *fShaderPath) {
   // vertex shader
   const char *vShaderSource = readFile(vShaderPath);
@@ -62,6 +64,7 @@ unsigned int createShader(char *vShaderPath, char *fShaderPath) {
 
   glDeleteShader(vShader);
   glDeleteShader(fShader);
+  loggerInfo(ID, "Created shader");
   return shaderProgram;
 }
 
@@ -71,4 +74,8 @@ void shaderSetInt(unsigned int id, char *uniform, int value) {
 
 void shaderSetFloat(unsigned int id, char *uniform, float value) {
   glUniform1f(glGetUniformLocation(id, uniform), value);
+}
+
+void shaderSetMat4(unsigned int id, char *uniform, float *value) {
+  glUniformMatrix4fv(glGetUniformLocation(id, uniform), 1, GL_FALSE, value);
 }

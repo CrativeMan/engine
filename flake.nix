@@ -23,13 +23,14 @@
         formatter = pkgs.alejandra;
         devShell = mkShell.override { stdenv = clangStdenv; } {
           packages = [
-            clang-tools
-llvmPackages.clangUseLLVM
-gcc
-clang
-cmake
-glfw
-glew
+          clang-tools
+          llvmPackages.clangUseLLVM
+          gcc
+          clang
+          cmake
+          glfw
+          glew
+          cglm
 
           ];
         };
