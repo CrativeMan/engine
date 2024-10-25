@@ -14,7 +14,7 @@
 
 #define ID "Engine"
 
-// global variables for accessing in the entire program
+/*** Structures ***/
 typedef struct {
   GLFWwindow *window;
   unsigned int shaderProgram;
@@ -28,17 +28,10 @@ typedef struct {
   unsigned int EBO;
 } Mesh;
 
-float vertices[] = {
-    // positions          // colors           // texture coords
-    0.5f,  0.5f,  0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, // top right
-    0.5f,  -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // bottom right
-    -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom left
-    -0.5f, 0.5f,  0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f  // top left
-};
+/*** Function definitions ***/
+void render(Mesh *mesh);
 
-unsigned int indices[] = {0, 1, 3, 1, 2, 3};
-
-// when window is resized
+/*** Callback Functions ***/
 void frame_buffer_size_callback(GLFWwindow *window, int width, int height) {
   glViewport(0, 0, width, height);
 }
@@ -48,6 +41,7 @@ void processInput(GLFWwindow *window) {
     glfwSetWindowShouldClose(window, GLFW_TRUE);
 }
 
+/*** Rendering Functions ***/
 void render(Mesh *mesh) {
   // draw background
   glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -67,6 +61,7 @@ void render(Mesh *mesh) {
   glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
+/*** Init functions ***/
 void init() {
   if (!glfwInit()) {
     loggerError("GLFW", "Failed to init glfw");
@@ -106,8 +101,16 @@ int main(int argc, char **argv) {
   global.textures[1] = loadImage("src/textures/awesomeface.png");
   loggerInfo(ID, "Created shader and images");
 
-  // buffer and array objects
   Mesh mesh;
+  float vertices[] = {
+      // positions          // colors           // texture coords
+      0.5f,  0.5f,  0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, // top right
+      0.5f,  -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // bottom right
+      -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom left
+      -0.5f, 0.5f,  0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f  // top left
+  };
+  unsigned int indices[] = {0, 1, 3, 1, 2, 3};
+
   glGenVertexArrays(1, &mesh.VAO);
   glGenBuffers(1, &mesh.VBO);
   glGenBuffers(1, &mesh.EBO);

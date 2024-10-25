@@ -1,3 +1,4 @@
+#include <GL/glew.h>
 #include <stdio.h>
 
 #include "header/logger.h"
