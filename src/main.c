@@ -33,6 +33,27 @@ typedef struct {
 } Global;
 Global global;
 
+float vertices[] = {
+    // pos              tex
+    -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, // 0
+    0.5f,  -0.5f, -0.5f, 0.0f, 1.0f, // 1
+    0.5f,  -0.5f, 0.5f,  1.0f, 1.0f, // 2
+    -0.5f, -0.5f, 0.5f,  1.0f, 0.0f, // 3
+    -0.5f, 0.5f,  -0.5f, 0.0f, 0.0f, // 4
+    0.5f,  0.5f,  -0.5f, 0.0f, 1.0f, // 5
+    0.5f,  0.5f,  0.5f,  1.0f, 1.0f, // 6
+    -0.5f, 0.5f,  0.5f,  1.0f, 0.0f  // 7
+};
+
+unsigned int indices[] = {
+    0, 1, 2, 0, 2, 3, // down
+    4, 5, 6, 4, 6, 7, // up
+    1, 2, 6, 1, 6, 5, // right
+    3, 0, 4, 3, 4, 7, // left
+    0, 4, 5, 0, 1, 5, // front
+    3, 2, 6, 3, 6, 7, // back
+};
+
 vec3 cubePositions[] = {
     {0.0f, 0.0f, 0.0f},     {2.0f, 5.0f, -15.0f}, {-1.5f, -2.2f, -2.5f},
     {-3.8f, -2.0f, -12.3f}, {2.4f, -0.4f, -3.5f}, {-1.7f, 3.0f, -7.5f},
@@ -57,15 +78,18 @@ void processInput(GLFWwindow *window) {
 void render(Mesh *mesh) {
   // draw background
   glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+  // color bit for background depth for depth lol
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   // use specific texture
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, global.textures[0]);
 
+  // view matrix
   mat4 view;
   glm_mat4_identity(view);
-  glm_translate(view, (vec3){0.0f, 0.0f, -3.0f});
+  glm_translate(view, (vec3){0.0f, 0.0f, -6.0f});
+  // glm_rotate(view, glm_rad(45), (vec3){0.0f, -1.0f, 0.0f});
 
   mat4 projection;
   glm_mat4_identity(projection);
@@ -127,27 +151,6 @@ int main(int argc, char **argv) {
   global.shaderProgram =
       createShader("src/shaders/vertex.glsl", "src/shaders/fragment.glsl");
   global.textures[0] = loadImage("src/textures/wall.jpg");
-
-  float vertices[] = {
-      // pos              tex
-      -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, // 0
-      0.5f,  -0.5f, -0.5f, 0.0f, 1.0f, // 1
-      0.5f,  -0.5f, 0.5f,  1.0f, 1.0f, // 2
-      -0.5f, -0.5f, 0.5f,  1.0f, 0.0f, // 3
-      -0.5f, 0.5f,  -0.5f, 0.0f, 0.0f, // 4
-      0.5f,  0.5f,  -0.5f, 0.0f, 1.0f, // 5
-      0.5f,  0.5f,  0.5f,  1.0f, 1.0f, // 6
-      -0.5f, 0.5f,  0.5f,  1.0f, 0.0f  // 7
-  };
-
-  unsigned int indices[] = {
-      0, 1, 2, 0, 2, 3, // down
-      4, 5, 6, 4, 6, 7, // up
-      1, 2, 6, 1, 6, 5, // right
-      3, 0, 4, 3, 4, 7, // left
-      0, 4, 5, 0, 1, 5, // front
-      3, 2, 6, 3, 6, 7, // back
-  };
 
   // mesh 1
   Mesh mesh;
