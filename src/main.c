@@ -33,6 +33,13 @@ typedef struct {
 } Global;
 Global global;
 
+vec3 cubePositions[] = {
+    {0.0f, 0.0f, 0.0f},     {2.0f, 5.0f, -15.0f}, {-1.5f, -2.2f, -2.5f},
+    {-3.8f, -2.0f, -12.3f}, {2.4f, -0.4f, -3.5f}, {-1.7f, 3.0f, -7.5f},
+    {1.3f, -2.0f, -2.5f},   {1.5f, 2.0f, -2.5f},  {1.5f, 0.2f, -1.5f},
+    {-1.3f, 1.0f, -1.5f},
+};
+
 /*** Function definitions ***/
 void render(Mesh *mesh);
 
@@ -56,11 +63,6 @@ void render(Mesh *mesh) {
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, global.textures[0]);
 
-  mat4 model;
-  glm_mat4_identity(model);
-  glm_rotate(model, (float)glfwGetTime() * glm_rad(50.0f),
-             (vec3){0.5f, 1.0f, 0.0f});
-
   mat4 view;
   glm_mat4_identity(view);
   glm_translate(view, (vec3){0.0f, 0.0f, -3.0f});
@@ -69,13 +71,20 @@ void render(Mesh *mesh) {
   glm_mat4_identity(projection);
   glm_perspective(glm_rad(45.0f), 800.0f / 600.0f, 0.1f, 100.0f, projection);
 
-  shaderSetMat4(global.shaderProgram, "model", (float *)model);
   shaderSetMat4(global.shaderProgram, "view", (float *)view);
   shaderSetMat4(global.shaderProgram, "projection", (float *)projection);
 
   glBindVertexArray(mesh->VAO);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->EBO);
-  glDrawElements(GL_TRIANGLES, mesh->indicesCount, GL_UNSIGNED_INT, 0);
+  for (unsigned int i = 0; i < 10; i++) {
+    mat4 model;
+    glm_mat4_identity(model);
+    glm_translate(model, cubePositions[i]);
+    float angle = 20.0f * i;
+    glm_rotate(model, glm_rad(angle), (vec3){1.0f, 0.3f, 0.5f});
+    shaderSetMat4(global.shaderProgram, "model", (float *)model);
+    glDrawElements(GL_TRIANGLES, mesh->indicesCount, GL_UNSIGNED_INT, 0);
+  }
   // glDrawArrays(GL_TRIANGLES, 0, 36);
 }
 
