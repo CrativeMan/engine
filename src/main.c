@@ -1,5 +1,4 @@
 #include <GL/glew.h>
-#include <math.h>
 #include <stdlib.h>
 
 #include <GL/gl.h>
@@ -9,8 +8,9 @@
 #include <string.h>
 
 #include "cglm/affine-pre.h"
-#include "cglm/affine.h"
-#include "cglm/types.h"
+#include "cglm/cam.h"
+#include "cglm/mat4.h"
+#include "cglm/util.h"
 #include "header/fileHandler.h"
 #include "header/logger.h"
 #include "header/main.h"
@@ -23,6 +23,7 @@ typedef struct {
   unsigned int VBO;
   unsigned int VAO;
   unsigned int EBO;
+  unsigned int indicesCount;
 } Mesh;
 
 typedef struct {
@@ -49,19 +50,33 @@ void processInput(GLFWwindow *window) {
 void render(Mesh *mesh) {
   // draw background
   glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-  glClear(GL_COLOR_BUFFER_BIT);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   // use specific texture
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, global.textures[0]);
-  glActiveTexture(GL_TEXTURE1);
-  glBindTexture(GL_TEXTURE_2D, global.textures[1]);
 
-  // rotation and translation
-  // order has to be in reverse because of matrix multiplication
+  mat4 model;
+  glm_mat4_identity(model);
+  glm_rotate(model, (float)glfwGetTime() * glm_rad(50.0f),
+             (vec3){0.5f, 1.0f, 0.0f});
+
+  mat4 view;
+  glm_mat4_identity(view);
+  glm_translate(view, (vec3){0.0f, 0.0f, -3.0f});
+
+  mat4 projection;
+  glm_mat4_identity(projection);
+  glm_perspective(glm_rad(45.0f), 800.0f / 600.0f, 0.1f, 100.0f, projection);
+
+  shaderSetMat4(global.shaderProgram, "model", (float *)model);
+  shaderSetMat4(global.shaderProgram, "view", (float *)view);
+  shaderSetMat4(global.shaderProgram, "projection", (float *)projection);
+
   glBindVertexArray(mesh->VAO);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->EBO);
-  glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+  glDrawElements(GL_TRIANGLES, mesh->indicesCount, GL_UNSIGNED_INT, 0);
+  // glDrawArrays(GL_TRIANGLES, 0, 36);
 }
 
 /*** Init functions ***/
@@ -91,6 +106,8 @@ void init() {
   glfwSetFramebufferSizeCallback(global.window, frame_buffer_size_callback);
   glViewport(0, 0, WIN_WIDTH, WIN_HEIGHT);
 
+  glEnable(GL_DEPTH_TEST);
+
   loggerInfo(ID, "Initialized game engine");
 }
 
@@ -101,19 +118,31 @@ int main(int argc, char **argv) {
   global.shaderProgram =
       createShader("src/shaders/vertex.glsl", "src/shaders/fragment.glsl");
   global.textures[0] = loadImage("src/textures/wall.jpg");
-  global.textures[1] = loadImage("src/textures/awesomeface.png");
 
   float vertices[] = {
-      // positions          // colors           // texture coords
-      0.5f,  0.5f,  0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, // top right
-      0.5f,  -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // bottom right
-      -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom left
-      -0.5f, 0.5f,  0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f  // top left
+      // pos              tex
+      -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, // 0
+      0.5f,  -0.5f, -0.5f, 0.0f, 1.0f, // 1
+      0.5f,  -0.5f, 0.5f,  1.0f, 1.0f, // 2
+      -0.5f, -0.5f, 0.5f,  1.0f, 0.0f, // 3
+      -0.5f, 0.5f,  -0.5f, 0.0f, 0.0f, // 4
+      0.5f,  0.5f,  -0.5f, 0.0f, 1.0f, // 5
+      0.5f,  0.5f,  0.5f,  1.0f, 1.0f, // 6
+      -0.5f, 0.5f,  0.5f,  1.0f, 0.0f  // 7
   };
-  unsigned int indices[] = {0, 1, 3, 1, 2, 3};
+
+  unsigned int indices[] = {
+      0, 1, 2, 0, 2, 3, // down
+      4, 5, 6, 4, 6, 7, // up
+      1, 2, 6, 1, 6, 5, // right
+      3, 0, 4, 3, 4, 7, // left
+      0, 4, 5, 0, 1, 5, // front
+      3, 2, 6, 3, 6, 7, // back
+  };
 
   // mesh 1
   Mesh mesh;
+  mesh.indicesCount = sizeof(indices) / sizeof(unsigned int);
   glGenVertexArrays(1, &mesh.VAO);
   glGenBuffers(1, &mesh.VBO);
   glGenBuffers(1, &mesh.EBO);
@@ -129,14 +158,14 @@ int main(int argc, char **argv) {
 
   // vertex attrib pointers
   // pointer to the position
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)0);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)0);
   glEnableVertexAttribArray(0);
   // pointer to the color values
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float),
                         (void *)(3 * sizeof(float)));
   glEnableVertexAttribArray(1);
   // pointer to the tex coords
-  glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
+  glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float),
                         (void *)(6 * sizeof(float)));
   glEnableVertexAttribArray(2);
 
