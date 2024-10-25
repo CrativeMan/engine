@@ -29,12 +29,11 @@ typedef struct {
   GLFWwindow *window;
   unsigned int shaderProgram;
   unsigned int textures[2]; // XXX temp
-  Mesh meshes[2];
 } Global;
 Global global;
 
 /*** Function definitions ***/
-void render(Mesh *mesh1, Mesh *mesh2);
+void render(Mesh *mesh);
 
 /*** Callback Functions ***/
 void frame_buffer_size_callback(GLFWwindow *window, int width, int height) {
@@ -47,7 +46,7 @@ void processInput(GLFWwindow *window) {
 }
 
 /*** Rendering Functions ***/
-void render(Mesh *mesh1, Mesh *mesh2) {
+void render(Mesh *mesh) {
   // draw background
   glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT);
@@ -60,33 +59,8 @@ void render(Mesh *mesh1, Mesh *mesh2) {
 
   // rotation and translation
   // order has to be in reverse because of matrix multiplication
-  mat4 trans;
-  vec3 translate = {0.5f, -0.5f, 0.0f};
-  vec3 axis = {0.0f, 0.f, 1.0f};
-  glm_mat4_identity(trans);
-  glm_translate(trans, translate);
-  glm_rotate(trans, (float)glfwGetTime(), axis);
-
-  // set the transform and rotation mat4 to the shader
-  shaderSetMat4(global.shaderProgram, "transform", (float *)trans);
-
-  glBindVertexArray(mesh1->VAO);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh1->EBO);
-  glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-  // other shader stuff
-  vec3 translation = {-0.5f, 0.5f, 0.0f};
-  float time = glfwGetTime();
-  vec3 scale = {(float)(1.0 * sin(1.0 * time)), (float)(1.0 * sin(1.0 * time)),
-                (float)(1.0 * sin(1.0 * time))};
-  // vec3 scale = {0.5f, 0.5f, 0.5f};
-  glm_mat4_identity(trans);
-  glm_translate(trans, translation);
-  glm_scale(trans, scale);
-
-  shaderSetMat4(global.shaderProgram, "transform", (float *)trans);
-
-  glBindVertexArray(mesh2->VAO);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh2->EBO);
+  glBindVertexArray(mesh->VAO);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->EBO);
   glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
@@ -139,16 +113,17 @@ int main(int argc, char **argv) {
   unsigned int indices[] = {0, 1, 3, 1, 2, 3};
 
   // mesh 1
-  glGenVertexArrays(1, &global.meshes[0].VAO);
-  glGenBuffers(1, &global.meshes[0].VBO);
-  glGenBuffers(1, &global.meshes[0].EBO);
+  Mesh mesh;
+  glGenVertexArrays(1, &mesh.VAO);
+  glGenBuffers(1, &mesh.VBO);
+  glGenBuffers(1, &mesh.EBO);
 
-  glBindVertexArray(global.meshes[0].VAO);
+  glBindVertexArray(mesh.VAO);
 
-  glBindBuffer(GL_ARRAY_BUFFER, global.meshes[0].VBO);
+  glBindBuffer(GL_ARRAY_BUFFER, mesh.VBO);
   glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, global.meshes[0].EBO);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.EBO);
   glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices,
                GL_STATIC_DRAW);
 
@@ -168,9 +143,6 @@ int main(int argc, char **argv) {
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   glBindVertexArray(0);
 
-  // mesh 2
-  global.meshes[1] = global.meshes[0];
-
   // if draw in wireframe
   if (argc == 2)
     if (strcmp(argv[1], " -w"))
@@ -188,7 +160,7 @@ int main(int argc, char **argv) {
     processInput(global.window);
 
     // rendering
-    render(&global.meshes[0], &global.meshes[1]);
+    render(&mesh);
 
     // check all events and swap buffers
     glfwSwapBuffers(global.window);
@@ -196,10 +168,8 @@ int main(int argc, char **argv) {
   }
 
   // cleanup
-  glDeleteVertexArrays(1, &global.meshes[0].VAO);
-  glDeleteVertexArrays(1, &global.meshes[1].VAO);
-  glDeleteBuffers(1, &global.meshes[0].VBO);
-  glDeleteBuffers(1, &global.meshes[1].VBO);
+  glDeleteVertexArrays(1, &mesh.VAO);
+  glDeleteBuffers(1, &mesh.VBO);
   glDeleteProgram(global.shaderProgram);
 
   loggerInfo(ID, "Exit engine");
