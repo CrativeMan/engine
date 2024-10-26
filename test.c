@@ -1,26 +1,26 @@
-#include <cglm/cglm.h>
+#include <stdio.h>
+#include <string.h>
+
+void print_padded_message(const char *input) {
+  char buffer[128]; // Buffer to hold the final formatted string
+  int input_length = strlen(input);
+  int total_length = input_length + 2; // 2 for "[" and "]"
+
+  // Format the string with padding if it's shorter than 20 characters
+  if (total_length < 20) {
+    snprintf(buffer, sizeof(buffer), "[%s]%*s", input, 20 - total_length, "");
+  } else {
+    snprintf(buffer, sizeof(buffer), "[%s]", input); // No padding needed
+  }
+
+  printf("%s", buffer);
+}
 
 int main() {
-  // vector x=1, y=0, z=0, w=1
-  vec4 vec = {1.0f, 0.0f, 0.0f, 1.0f};
-  // matrix
-  /*
-    1 0 0 0
-    0 1 0 0
-    0 0 1 0
-    0 0 0 1
-  */
-  mat4 trans;
-  glm_mat4_identity(trans);
-  /*
-    1 0 0 1
-    0 1 0 1
-    0 0 1 0
-    0 0 0 1
-  */
-  vec3 axis = {0.0f, 0.f, 1.0f};
-  vec3 scale = {0.5f, 0.5f, 0.5f};
-  glm_rotate(trans, glm_rad(90.0f), axis);
-  glm_scale(trans, scale);
+  // Test cases
+  print_padded_message("Hello"); // Output: "[Hello]          "
+  printf("test");
+  print_padded_message(
+      "LongStringThatExceeds"); // Output: "[LongStringThatExceeds]"
   return 0;
 }

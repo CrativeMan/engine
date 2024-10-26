@@ -27,9 +27,9 @@ unsigned int createShader(char *vShaderPath, char *fShaderPath) {
   glGetShaderiv(vShader, GL_COMPILE_STATUS, &success);
   if (!success) {
     glGetShaderInfoLog(vShader, 512, NULL, infoLog);
-    loggerError("vShader", "Vertex shader compilation failed\n");
-    printf("%s\n", infoLog);
+    loggerError("vShader", "Vertex shader compilation failed\n%s\n", infoLog);
   }
+  loggerInfo(ID, "Created vertex shader from %s", vShaderPath);
 
   // fragment shader
   const char *fShaderSource = readFile(fShaderPath);
@@ -44,9 +44,9 @@ unsigned int createShader(char *vShaderPath, char *fShaderPath) {
   glGetShaderiv(fShader, GL_COMPILE_STATUS, &success);
   if (!success) {
     glGetShaderInfoLog(fShader, 512, NULL, infoLog);
-    loggerError("fShader", "Fragment shader compilation failed");
-    printf("%s\n", infoLog);
+    loggerError("fShader", "Fragment shader compilation failed\n%s\n", infoLog);
   }
+  loggerInfo(ID, "Created fragment shader from %s", fShaderPath);
 
   // shader linking
   unsigned int shaderProgram;
@@ -58,13 +58,12 @@ unsigned int createShader(char *vShaderPath, char *fShaderPath) {
   glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
   if (!success) {
     glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
-    loggerError("ShaderProgram", "Shader linking failed");
-    printf("%s\n", infoLog);
+    loggerError("ShaderProgram", "Shader linking failed\n%s\n", infoLog);
   }
 
   glDeleteShader(vShader);
   glDeleteShader(fShader);
-  loggerInfo(ID, "Created shader");
+  loggerInfo(ID, "Created shader %d", shaderProgram);
   return shaderProgram;
 }
 

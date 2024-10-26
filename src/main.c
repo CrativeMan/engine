@@ -86,7 +86,7 @@ void render(Mesh *mesh) {
   // view matrix
   mat4 view;
   glm_mat4_identity(view);
-  glm_translate(view, (vec3){0.0f, 0.0f, -10.0f});
+  glm_translate(view, (vec3){0.0f, 0.0f, -6.0f});
 
   mat4 projection;
   glm_mat4_identity(projection);
@@ -95,13 +95,13 @@ void render(Mesh *mesh) {
   shaderSetMat4(global.shaderProgram, "view", (float *)view);
   shaderSetMat4(global.shaderProgram, "projection", (float *)projection);
 
-  vec3 cameraPos = (vec3){0.0f, 0.0f, 3.0f};
-  vec3 cameraTarget = (vec3){0.0f, 0.0f, 0.0f};
+  vec3 cameraPos = {0.0f, 0.0f, 3.0f};
+  vec3 cameraTarget = {0.0f, 0.0f, 0.0f};
   vec3 cameraDirection;
   glm_vec3_sub(cameraPos, cameraTarget, cameraDirection);
   glm_normalize(cameraDirection);
 
-  vec3 up = (vec3){0.0f, 1.0f, 0.0f};
+  vec3 up = {0.0f, 1.0f, 0.0f};
   vec3 cameraRight;
   glm_cross(up, cameraDirection, cameraRight);
   glm_normalize(cameraRight);

@@ -40,7 +40,7 @@ unsigned int loadImage(char *filename) {
   }
 
   stbi_image_free(data);
-  loggerInfo("Image", "Generated texture");
+  loggerInfo("Image", "Generated texture from '%s'", filename);
   return texture;
 }
 
@@ -74,6 +74,6 @@ const char *readFile(const char *filepath) {
   fclose(file);
   const char *fileContents = (const char *)buffer;
 
-  loggerInfo("File", "Generated char* from file");
+  loggerInfo("File", "Generated char* from file '%s'", filepath);
   return fileContents;
 }
