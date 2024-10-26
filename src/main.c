@@ -7,10 +7,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "cglm/affine-pre.h"
-#include "cglm/cam.h"
-#include "cglm/mat4.h"
-#include "cglm/util.h"
+#include "cglm/vec3.h"
 #include "header/fileHandler.h"
 #include "header/logger.h"
 #include "header/main.h"
@@ -30,6 +27,7 @@ typedef struct {
   GLFWwindow *window;
   unsigned int shaderProgram;
   unsigned int textures[2]; // XXX temp
+  vec3 cameraPos;
 } Global;
 Global global;
 
@@ -88,8 +86,7 @@ void render(Mesh *mesh) {
   // view matrix
   mat4 view;
   glm_mat4_identity(view);
-  glm_translate(view, (vec3){0.0f, 0.0f, -6.0f});
-  // glm_rotate(view, glm_rad(45), (vec3){0.0f, -1.0f, 0.0f});
+  glm_translate(view, (vec3){0.0f, 0.0f, -10.0f});
 
   mat4 projection;
   glm_mat4_identity(projection);
@@ -98,6 +95,20 @@ void render(Mesh *mesh) {
   shaderSetMat4(global.shaderProgram, "view", (float *)view);
   shaderSetMat4(global.shaderProgram, "projection", (float *)projection);
 
+  vec3 cameraPos = (vec3){0.0f, 0.0f, 3.0f};
+  vec3 cameraTarget = (vec3){0.0f, 0.0f, 0.0f};
+  vec3 cameraDirection;
+  glm_vec3_sub(cameraPos, cameraTarget, cameraDirection);
+  glm_normalize(cameraDirection);
+
+  vec3 up = (vec3){0.0f, 1.0f, 0.0f};
+  vec3 cameraRight;
+  glm_cross(up, cameraDirection, cameraRight);
+  glm_normalize(cameraRight);
+
+  vec3 cameraUp;
+  glm_cross(cameraDirection, cameraRight, cameraUp);
+
   glBindVertexArray(mesh->VAO);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->EBO);
   for (unsigned int i = 0; i < 10; i++) {
@@ -105,6 +116,8 @@ void render(Mesh *mesh) {
     glm_mat4_identity(model);
     glm_translate(model, cubePositions[i]);
     float angle = 20.0f * i;
+    if (i % 3 == 0)
+      angle = glfwGetTime() * 25.0f;
     glm_rotate(model, glm_rad(angle), (vec3){1.0f, 0.3f, 0.5f});
     shaderSetMat4(global.shaderProgram, "model", (float *)model);
     glDrawElements(GL_TRIANGLES, mesh->indicesCount, GL_UNSIGNED_INT, 0);
@@ -141,16 +154,16 @@ void init() {
 
   glEnable(GL_DEPTH_TEST);
 
+  // create shader
+  global.shaderProgram =
+      createShader("src/shaders/vertex.glsl", "src/shaders/fragment.glsl");
+  global.textures[0] = loadImage("src/textures/wall.jpg");
+
   loggerInfo(ID, "Initialized game engine");
 }
 
 int main(int argc, char **argv) {
   init();
-
-  // create shader
-  global.shaderProgram =
-      createShader("src/shaders/vertex.glsl", "src/shaders/fragment.glsl");
-  global.textures[0] = loadImage("src/textures/wall.jpg");
 
   // mesh 1
   Mesh mesh;
