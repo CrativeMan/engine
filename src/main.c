@@ -7,6 +7,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "cglm/cam.h"
+#include "cglm/simd/x86.h"
 #include "cglm/vec3.h"
 #include "header/fileHandler.h"
 #include "header/logger.h"
@@ -24,10 +26,17 @@ typedef struct {
 } Mesh;
 
 typedef struct {
+  vec3 cameraPos;
+  vec3 cameraFront;
+  vec3 cameraUp;
+  float cameraSpeed;
+} Camera;
+
+typedef struct {
   GLFWwindow *window;
   unsigned int shaderProgram;
   unsigned int textures[2]; // XXX temp
-  vec3 cameraPos;
+  Camera camera;
 } Global;
 Global global;
 
@@ -64,12 +73,41 @@ void render(Mesh *mesh);
 
 /*** Callback Functions ***/
 void frame_buffer_size_callback(GLFWwindow *window, int width, int height) {
+  (void)window;
   glViewport(0, 0, width, height);
 }
 
 void processInput(GLFWwindow *window) {
   if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
     glfwSetWindowShouldClose(window, GLFW_TRUE);
+  if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+    vec3 scaledFront;
+    glm_vec3_scale(global.camera.cameraFront, global.camera.cameraSpeed,
+                   scaledFront);
+    glm_vec3_add(global.camera.cameraPos, scaledFront, global.camera.cameraPos);
+  }
+  if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+    vec3 scaledFront;
+    glm_vec3_scale(global.camera.cameraFront, global.camera.cameraSpeed,
+                   scaledFront);
+    glm_vec3_sub(global.camera.cameraPos, scaledFront, global.camera.cameraPos);
+  }
+  if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+    vec3 cross;
+    glm_cross(global.camera.cameraFront, global.camera.cameraUp, cross);
+    glm_vec3_normalize(cross);
+    vec3 multiply;
+    glm_vec3_scale(cross, global.camera.cameraSpeed, multiply);
+    glm_vec3_sub(global.camera.cameraPos, multiply, global.camera.cameraPos);
+  }
+  if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+    vec3 cross;
+    glm_cross(global.camera.cameraFront, global.camera.cameraUp, cross);
+    glm_vec3_normalize(cross);
+    vec3 multiply;
+    glm_vec3_scale(cross, global.camera.cameraSpeed, multiply);
+    glm_vec3_add(global.camera.cameraPos, multiply, global.camera.cameraPos);
+  }
 }
 
 /*** Rendering Functions ***/
@@ -83,31 +121,17 @@ void render(Mesh *mesh) {
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, global.textures[0]);
 
-  // view matrix
-  mat4 view;
-  glm_mat4_identity(view);
-  glm_translate(view, (vec3){0.0f, 0.0f, -6.0f});
-
   mat4 projection;
   glm_mat4_identity(projection);
   glm_perspective(glm_rad(45.0f), 800.0f / 600.0f, 0.1f, 100.0f, projection);
 
+  mat4 view;
+  vec3 center;
+  glm_vec3_add(global.camera.cameraPos, global.camera.cameraFront, center);
+  glm_lookat(global.camera.cameraPos, center, global.camera.cameraUp, view);
+
   shaderSetMat4(global.shaderProgram, "view", (float *)view);
   shaderSetMat4(global.shaderProgram, "projection", (float *)projection);
-
-  vec3 cameraPos = {0.0f, 0.0f, 3.0f};
-  vec3 cameraTarget = {0.0f, 0.0f, 0.0f};
-  vec3 cameraDirection;
-  glm_vec3_sub(cameraPos, cameraTarget, cameraDirection);
-  glm_normalize(cameraDirection);
-
-  vec3 up = {0.0f, 1.0f, 0.0f};
-  vec3 cameraRight;
-  glm_cross(up, cameraDirection, cameraRight);
-  glm_normalize(cameraRight);
-
-  vec3 cameraUp;
-  glm_cross(cameraDirection, cameraRight, cameraUp);
 
   glBindVertexArray(mesh->VAO);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->EBO);
@@ -160,6 +184,12 @@ void init() {
   global.textures[0] = loadImage("src/textures/wall.jpg");
 
   loggerInfo(ID, "Initialized game engine");
+
+  // init camera
+  glm_vec3_copy((vec3){0.0f, 0.0f, 3.0f}, global.camera.cameraPos);
+  glm_vec3_copy((vec3){0.0f, 0.0f, -1.0f}, global.camera.cameraFront);
+  glm_vec3_copy((vec3){0.0f, 1.0f, 0.0f}, global.camera.cameraUp);
+  global.camera.cameraSpeed = 0.05f;
 }
 
 int main(int argc, char **argv) {
