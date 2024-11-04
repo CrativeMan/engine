@@ -19,8 +19,8 @@ typedef struct {
   float sensitivity;
 } Camera;
 
+void initCamera(Camera *camera);
 void cameraProcessInput(GLFWwindow *window, Camera *camera);
-void cameraProcessScrollInput(GLFWwindow *window, Camera *camera,
-                              float yoffset);
+void cameraProcessScrollInput(Camera *camera, float yoffset);
 
 #endif // CAMERA_H

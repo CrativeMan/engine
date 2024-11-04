@@ -4,10 +4,10 @@
 #include <GL/gl.h>
 #include <GLFW/glfw3.h>
 #include <cglm/cglm.h>
-#include <math.h>
 #include <stdio.h>
 #include <string.h>
 
+#include "cglm/types.h"
 #include "header/callbacks.h"
 #include "header/camera.h"
 #include "header/fileHandler.h"
@@ -21,16 +21,16 @@
 #define Y 1
 #define Z 2
 
-/*** Global Variables ***/
 typedef struct {
   unsigned int shaderProgram;
-  unsigned int textures[2]; // XXX temp
   Window window;
   Camera camera;
 } Global;
 Global global;
+Mesh mesh;
 bool firstMouse;
 
+/*** Global Variables ***/
 float vertices[] = {
     // pos              tex
     -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, // 0
@@ -59,10 +59,13 @@ vec3 cubePositions[] = {
     {-1.3f, 1.0f, -1.5f},
 };
 
-/*** Function definitions ***/
-void render(Mesh *mesh);
-
 /*** Callback Functions ***/
+void mouseScrollCallback(GLFWwindow *window, double xoffset, double yoffset) {
+  (void)window;
+  (void)xoffset;
+  cameraProcessScrollInput(&global.camera, yoffset);
+}
+
 void mousePosCallback(GLFWwindow *window, double xpos, double ypos) {
   (void)window;
 
@@ -91,14 +94,13 @@ void mousePosCallback(GLFWwindow *window, double xpos, double ypos) {
 
 /*** Input functions ***/
 void processInput(GLFWwindow *window) {
-  global.camera.cameraSpeed = 2.5f * global.camera.deltaTime;
   if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
     glfwSetWindowShouldClose(window, GLFW_TRUE);
   cameraProcessInput(window, &global.camera);
 }
 
 /*** Rendering Functions ***/
-void render(Mesh *mesh) {
+void renderFrame(Mesh *mesh) {
   // setup delta time
   float currentFrame = glfwGetTime();
   global.camera.deltaTime = currentFrame - global.camera.lastFrame;
@@ -111,7 +113,7 @@ void render(Mesh *mesh) {
 
   // use specific texture
   glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_2D, global.textures[0]);
+  glBindTexture(GL_TEXTURE_2D, mesh->texture);
 
   // matrices for camera
   mat4 projection;
@@ -121,10 +123,10 @@ void render(Mesh *mesh) {
 
   // direction
   vec3 direction;
-  direction[X] =
+  direction[0] =
       cos(glm_rad(global.camera.yaw)) * cos(glm_rad(global.camera.pitch));
-  direction[Y] = sin(glm_rad(global.camera.pitch));
-  direction[Z] =
+  direction[1] = sin(glm_rad(global.camera.pitch));
+  direction[2] =
       sin(glm_rad(global.camera.yaw)) * cos(glm_rad(global.camera.pitch));
   glm_vec3_normalize_to(direction, global.camera.cameraFront);
 
@@ -140,7 +142,7 @@ void render(Mesh *mesh) {
   glBindVertexArray(mesh->VAO);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->EBO);
   // loop through all cubes
-  for (unsigned int i = 0; i < sizeof(cubePositions) / sizeof(vec3); i++) {
+  for (int i = 0; i < 10; i++) {
     mat4 model;
     glm_mat4_identity(model);
     glm_translate(model, cubePositions[i]);
@@ -161,7 +163,7 @@ void render(Mesh *mesh) {
 }
 
 /*** Init functions ***/
-void init() {
+void init(Mesh *mesh) {
   if (!glfwInit()) {
     loggerError("GLFW", "Failed to init glfw");
     exit(EXIT_FAILURE);
@@ -201,18 +203,7 @@ void init() {
   global.shaderProgram =
       createShader("src/shaders/vertex.glsl", "src/shaders/fragment.glsl");
   // texture
-  global.textures[0] = loadImage("src/textures/wall.jpg");
-
-  // init camera
-  glm_vec3_copy((vec3){0.0f, 0.0f, 3.0f}, global.camera.cameraPos);
-  glm_vec3_copy((vec3){0.0f, 0.0f, -1.0f}, global.camera.cameraFront);
-  glm_vec3_copy((vec3){0.0f, 1.0f, 0.0f}, global.camera.cameraUp);
-  global.camera.cameraSpeed = 0.05f;
-  global.camera.fov = 45.0f;
-  global.camera.yaw = -90.0f;
-  global.camera.lastX = 400;
-  global.camera.lastX = 300;
-  global.camera.sensitivity = 0.1f;
+  mesh->texture = loadImage("src/textures/wall.jpg");
 
   loggerInfo(ID, "Initialized game engine");
 }
@@ -229,11 +220,14 @@ void shutdown(Mesh *mesh) {
 }
 
 int main(int argc, char **argv) {
-  init();
+  // if draw in wireframe
+  if (argc == 2)
+    if (strcmp(argv[1], " -w"))
+      glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-  // mesh 1
-  Mesh mesh;
-  mesh.indicesCount = sizeof(indices) / sizeof(unsigned int);
+  init(&mesh);
+  initCamera(&global.camera);
+  // init mesh
   glGenVertexArrays(1, &mesh.VAO);
   glGenBuffers(1, &mesh.VBO);
   glGenBuffers(1, &mesh.EBO);
@@ -262,11 +256,9 @@ int main(int argc, char **argv) {
 
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   glBindVertexArray(0);
-
-  // if draw in wireframe
-  if (argc == 2)
-    if (strcmp(argv[1], " -w"))
-      glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+  mesh.verticesCount = 40;
+  mesh.indicesCount = 36;
+  mesh.cubePosCount = 10;
 
   // enable shader
   glUseProgram(global.shaderProgram);
@@ -280,7 +272,7 @@ int main(int argc, char **argv) {
     processInput(global.window.window);
 
     // rendering
-    render(&mesh);
+    renderFrame(&mesh);
 
     // check all events and swap buffers
     glfwSwapBuffers(global.window.window);

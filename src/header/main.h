@@ -11,7 +11,10 @@ typedef struct {
   unsigned int VBO;
   unsigned int VAO;
   unsigned int EBO;
+  unsigned int texture;
+  unsigned int verticesCount;
   unsigned int indicesCount;
+  unsigned int cubePosCount;
 } Mesh;
 
 typedef struct {
