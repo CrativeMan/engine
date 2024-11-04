@@ -14,29 +14,7 @@
 
 #define ID "Engine"
 
-/*** Structures ***/
-typedef struct {
-  unsigned int VBO;
-  unsigned int VAO;
-  unsigned int EBO;
-  unsigned int indicesCount;
-} Mesh;
-
-typedef struct {
-  vec3 cameraPos;
-  vec3 cameraFront;
-  vec3 cameraUp;
-  float cameraSpeed;
-  float deltaTime;
-  float lastFrame;
-} Camera;
-
-typedef struct {
-  GLFWwindow *window;
-  unsigned int shaderProgram;
-  unsigned int textures[2]; // XXX temp
-  Camera camera;
-} Global;
+/*** Global Variables ***/
 Global global;
 
 float vertices[] = {
@@ -76,10 +54,13 @@ void frame_buffer_size_callback(GLFWwindow *window, int width, int height) {
   glViewport(0, 0, width, height);
 }
 
+/*** Input functions ***/
 void processInput(GLFWwindow *window) {
   global.camera.cameraSpeed = 2.5f * global.camera.deltaTime;
   if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
     glfwSetWindowShouldClose(window, GLFW_TRUE);
+
+  // movement input
   if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
     vec3 scaledFront;
     glm_vec3_scale(global.camera.cameraFront, global.camera.cameraSpeed,
@@ -110,12 +91,13 @@ void processInput(GLFWwindow *window) {
   }
 }
 
-char title[100];
 /*** Rendering Functions ***/
 void render(Mesh *mesh) {
+  // setup delta time
   float currentFrame = glfwGetTime();
   global.camera.deltaTime = currentFrame - global.camera.lastFrame;
   global.camera.lastFrame = currentFrame;
+
   // draw background
   glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
   // color bit for background depth for depth lol
@@ -125,6 +107,7 @@ void render(Mesh *mesh) {
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, global.textures[0]);
 
+  // matrices for camera
   mat4 projection;
   glm_mat4_identity(projection);
   glm_perspective(glm_rad(45.0f), 800.0f / 600.0f, 0.1f, 100.0f, projection);
@@ -137,9 +120,11 @@ void render(Mesh *mesh) {
   shaderSetMat4(global.shaderProgram, "view", (float *)view);
   shaderSetMat4(global.shaderProgram, "projection", (float *)projection);
 
+  // use mesh
   glBindVertexArray(mesh->VAO);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->EBO);
-  for (unsigned int i = 0; i < 10; i++) {
+  // loop through all cubes
+  for (unsigned int i = 0; i < sizeof(cubePositions) / sizeof(vec3); i++) {
     mat4 model;
     glm_mat4_identity(model);
     glm_translate(model, cubePositions[i]);
@@ -150,9 +135,11 @@ void render(Mesh *mesh) {
     shaderSetMat4(global.shaderProgram, "model", (float *)model);
     glDrawElements(GL_TRIANGLES, mesh->indicesCount, GL_UNSIGNED_INT, 0);
   }
-  snprintf(title, sizeof(title), "X:%.2f Y:%.2f", global.camera.cameraPos[0],
-           global.camera.cameraPos[2]);
-  glfwSetWindowTitle(global.window, title);
+
+  // set title
+  snprintf(global.window.title, sizeof(global.window.title), "X:%.2f Y:%.2f",
+           global.camera.cameraPos[0], global.camera.cameraPos[2]);
+  glfwSetWindowTitle(global.window.window, global.window.title);
 }
 
 /*** Init functions ***/
@@ -166,36 +153,41 @@ void init() {
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-  global.window = glfwCreateWindow(WIN_WIDTH, WIN_HEIGHT, "engine", NULL, NULL);
-  if (global.window == NULL) {
+  // create window
+  global.window.window =
+      glfwCreateWindow(WIN_WIDTH, WIN_HEIGHT, "engine", NULL, NULL);
+  if (global.window.window == NULL) {
     loggerError("GLFW", "Failed to create window");
     glfwTerminate();
     exit(EXIT_FAILURE);
   }
-  glfwMakeContextCurrent(global.window);
+  glfwMakeContextCurrent(global.window.window);
 
   // init glew
   glewExperimental = GL_TRUE;
   glewInit();
 
   // resize stuff
-  glfwSetFramebufferSizeCallback(global.window, frame_buffer_size_callback);
+  glfwSetFramebufferSizeCallback(global.window.window,
+                                 frame_buffer_size_callback);
   glViewport(0, 0, WIN_WIDTH, WIN_HEIGHT);
 
+  // enable depth
   glEnable(GL_DEPTH_TEST);
 
   // create shader
   global.shaderProgram =
       createShader("src/shaders/vertex.glsl", "src/shaders/fragment.glsl");
+  // texture
   global.textures[0] = loadImage("src/textures/wall.jpg");
-
-  loggerInfo(ID, "Initialized game engine");
 
   // init camera
   glm_vec3_copy((vec3){0.0f, 0.0f, 3.0f}, global.camera.cameraPos);
   glm_vec3_copy((vec3){0.0f, 0.0f, -1.0f}, global.camera.cameraFront);
   glm_vec3_copy((vec3){0.0f, 1.0f, 0.0f}, global.camera.cameraUp);
   global.camera.cameraSpeed = 0.05f;
+
+  loggerInfo(ID, "Initialized game engine");
 }
 
 /*** Shutdown functions ***/
@@ -256,15 +248,15 @@ int main(int argc, char **argv) {
 
   loggerInfo(ID, "Started game loop");
   // main loop
-  while (!glfwWindowShouldClose(global.window)) {
+  while (!glfwWindowShouldClose(global.window.window)) {
     // input
-    processInput(global.window);
+    processInput(global.window.window);
 
     // rendering
     render(&mesh);
 
     // check all events and swap buffers
-    glfwSwapBuffers(global.window);
+    glfwSwapBuffers(global.window.window);
     glfwPollEvents();
   }
   shutdown(&mesh);
