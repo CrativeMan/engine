@@ -21,6 +21,11 @@ typedef struct {
   float cameraSpeed;
   float deltaTime;
   float lastFrame;
+  float yaw;
+  float pitch;
+  float lastX;
+  float lastY;
+  float sensitivity;
 } Camera;
 
 typedef struct {

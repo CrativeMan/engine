@@ -4,6 +4,7 @@
 #include <GL/gl.h>
 #include <GLFW/glfw3.h>
 #include <cglm/cglm.h>
+#include <math.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -13,9 +14,13 @@
 #include "header/shader.h"
 
 #define ID "Engine"
+#define X 0
+#define Y 1
+#define Z 2
 
 /*** Global Variables ***/
 Global global;
+bool firstMouse;
 
 float vertices[] = {
     // pos              tex
@@ -52,6 +57,32 @@ void render(Mesh *mesh);
 void frame_buffer_size_callback(GLFWwindow *window, int width, int height) {
   (void)window;
   glViewport(0, 0, width, height);
+}
+
+void mouse_callback(GLFWwindow *window, double xpos, double ypos) {
+  (void)window;
+
+  if (firstMouse) {
+    global.camera.lastX = xpos;
+    global.camera.lastY = ypos;
+    firstMouse = false;
+  }
+
+  float xoffset = xpos - global.camera.lastX;
+  float yoffset = global.camera.lastY - ypos;
+
+  global.camera.lastX = xpos;
+  global.camera.lastY = ypos;
+  xoffset *= global.camera.sensitivity;
+  yoffset *= global.camera.sensitivity;
+
+  global.camera.yaw += xoffset;
+  global.camera.pitch += yoffset;
+
+  if (global.camera.pitch > 89.0f)
+    global.camera.pitch = 89.0f;
+  if (global.camera.pitch < -89.0f)
+    global.camera.pitch = -89.0f;
 }
 
 /*** Input functions ***/
@@ -112,6 +143,15 @@ void render(Mesh *mesh) {
   glm_mat4_identity(projection);
   glm_perspective(glm_rad(45.0f), 800.0f / 600.0f, 0.1f, 100.0f, projection);
 
+  // direction
+  vec3 direction;
+  direction[X] =
+      cos(glm_rad(global.camera.yaw)) * cos(glm_rad(global.camera.pitch));
+  direction[Y] = sin(glm_rad(global.camera.pitch));
+  direction[Z] =
+      sin(glm_rad(global.camera.yaw)) * cos(glm_rad(global.camera.pitch));
+  glm_vec3_normalize_to(direction, global.camera.cameraFront);
+
   mat4 view;
   vec3 center;
   glm_vec3_add(global.camera.cameraPos, global.camera.cameraFront, center);
@@ -137,8 +177,9 @@ void render(Mesh *mesh) {
   }
 
   // set title
-  snprintf(global.window.title, sizeof(global.window.title), "X:%.2f Y:%.2f",
-           global.camera.cameraPos[0], global.camera.cameraPos[2]);
+  snprintf(global.window.title, sizeof(global.window.title),
+           "X:%.2f Y:%.2f Z:%.2f", global.camera.cameraPos[X],
+           global.camera.cameraPos[Y], global.camera.cameraPos[Z]);
   glfwSetWindowTitle(global.window.window, global.window.title);
 }
 
@@ -163,6 +204,9 @@ void init() {
   }
   glfwMakeContextCurrent(global.window.window);
 
+  glfwSetInputMode(global.window.window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+  glfwSetCursorPosCallback(global.window.window, mouse_callback);
+
   // init glew
   glewExperimental = GL_TRUE;
   glewInit();
@@ -186,6 +230,10 @@ void init() {
   glm_vec3_copy((vec3){0.0f, 0.0f, -1.0f}, global.camera.cameraFront);
   glm_vec3_copy((vec3){0.0f, 1.0f, 0.0f}, global.camera.cameraUp);
   global.camera.cameraSpeed = 0.05f;
+  global.camera.yaw = -90.0f;
+  global.camera.lastX = 400;
+  global.camera.lastX = 300;
+  global.camera.sensitivity = 0.1f;
 
   loggerInfo(ID, "Initialized game engine");
 }
