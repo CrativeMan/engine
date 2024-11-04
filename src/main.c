@@ -27,6 +27,8 @@ typedef struct {
   vec3 cameraFront;
   vec3 cameraUp;
   float cameraSpeed;
+  float deltaTime;
+  float lastFrame;
 } Camera;
 
 typedef struct {
@@ -75,6 +77,7 @@ void frame_buffer_size_callback(GLFWwindow *window, int width, int height) {
 }
 
 void processInput(GLFWwindow *window) {
+  global.camera.cameraSpeed = 2.5f * global.camera.deltaTime;
   if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
     glfwSetWindowShouldClose(window, GLFW_TRUE);
   if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
@@ -110,6 +113,9 @@ void processInput(GLFWwindow *window) {
 char title[100];
 /*** Rendering Functions ***/
 void render(Mesh *mesh) {
+  float currentFrame = glfwGetTime();
+  global.camera.deltaTime = currentFrame - global.camera.lastFrame;
+  global.camera.lastFrame = currentFrame;
   // draw background
   glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
   // color bit for background depth for depth lol
