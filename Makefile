@@ -19,9 +19,6 @@ $(OBJDIR):
 $(TARGET): $(OBJS)
 	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
 
-test:
-	$(CC) test.c -o test $(TESTLDFLAGS)
-
 clean:
 	rm -f $(OBJS) $(TARGET)
 	rm -rf $(OBJDIR)
