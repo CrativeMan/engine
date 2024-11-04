@@ -8,17 +8,26 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "header/callbacks.h"
+#include "header/camera.h"
 #include "header/fileHandler.h"
 #include "header/logger.h"
 #include "header/main.h"
 #include "header/shader.h"
 
+/*** Defines ***/
 #define ID "Engine"
 #define X 0
 #define Y 1
 #define Z 2
 
 /*** Global Variables ***/
+typedef struct {
+  unsigned int shaderProgram;
+  unsigned int textures[2]; // XXX temp
+  Window window;
+  Camera camera;
+} Global;
 Global global;
 bool firstMouse;
 
@@ -54,12 +63,7 @@ vec3 cubePositions[] = {
 void render(Mesh *mesh);
 
 /*** Callback Functions ***/
-void frame_buffer_size_callback(GLFWwindow *window, int width, int height) {
-  (void)window;
-  glViewport(0, 0, width, height);
-}
-
-void mouse_callback(GLFWwindow *window, double xpos, double ypos) {
+void mousePosCallback(GLFWwindow *window, double xpos, double ypos) {
   (void)window;
 
   if (firstMouse) {
@@ -90,36 +94,7 @@ void processInput(GLFWwindow *window) {
   global.camera.cameraSpeed = 2.5f * global.camera.deltaTime;
   if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
     glfwSetWindowShouldClose(window, GLFW_TRUE);
-
-  // movement input
-  if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-    vec3 scaledFront;
-    glm_vec3_scale(global.camera.cameraFront, global.camera.cameraSpeed,
-                   scaledFront);
-    glm_vec3_add(global.camera.cameraPos, scaledFront, global.camera.cameraPos);
-  }
-  if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-    vec3 scaledFront;
-    glm_vec3_scale(global.camera.cameraFront, global.camera.cameraSpeed,
-                   scaledFront);
-    glm_vec3_sub(global.camera.cameraPos, scaledFront, global.camera.cameraPos);
-  }
-  if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-    vec3 cross;
-    glm_cross(global.camera.cameraFront, global.camera.cameraUp, cross);
-    glm_vec3_normalize(cross);
-    vec3 multiply;
-    glm_vec3_scale(cross, global.camera.cameraSpeed, multiply);
-    glm_vec3_sub(global.camera.cameraPos, multiply, global.camera.cameraPos);
-  }
-  if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-    vec3 cross;
-    glm_cross(global.camera.cameraFront, global.camera.cameraUp, cross);
-    glm_vec3_normalize(cross);
-    vec3 multiply;
-    glm_vec3_scale(cross, global.camera.cameraSpeed, multiply);
-    glm_vec3_add(global.camera.cameraPos, multiply, global.camera.cameraPos);
-  }
+  cameraProcessInput(window, &global.camera);
 }
 
 /*** Rendering Functions ***/
@@ -141,7 +116,8 @@ void render(Mesh *mesh) {
   // matrices for camera
   mat4 projection;
   glm_mat4_identity(projection);
-  glm_perspective(glm_rad(45.0f), 800.0f / 600.0f, 0.1f, 100.0f, projection);
+  glm_perspective(glm_rad(global.camera.fov), 800.0f / 600.0f, 0.1f, 100.0f,
+                  projection);
 
   // direction
   vec3 direction;
@@ -178,8 +154,9 @@ void render(Mesh *mesh) {
 
   // set title
   snprintf(global.window.title, sizeof(global.window.title),
-           "X:%.2f Y:%.2f Z:%.2f", global.camera.cameraPos[X],
-           global.camera.cameraPos[Y], global.camera.cameraPos[Z]);
+           "X:%.2f Y:%.2f Z:%.2f FOV:%.0f", global.camera.cameraPos[X],
+           global.camera.cameraPos[Y], global.camera.cameraPos[Z],
+           global.camera.fov);
   glfwSetWindowTitle(global.window.window, global.window.title);
 }
 
@@ -205,7 +182,8 @@ void init() {
   glfwMakeContextCurrent(global.window.window);
 
   glfwSetInputMode(global.window.window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-  glfwSetCursorPosCallback(global.window.window, mouse_callback);
+  glfwSetCursorPosCallback(global.window.window, mousePosCallback);
+  glfwSetScrollCallback(global.window.window, mouseScrollCallback);
 
   // init glew
   glewExperimental = GL_TRUE;
@@ -230,6 +208,7 @@ void init() {
   glm_vec3_copy((vec3){0.0f, 0.0f, -1.0f}, global.camera.cameraFront);
   glm_vec3_copy((vec3){0.0f, 1.0f, 0.0f}, global.camera.cameraUp);
   global.camera.cameraSpeed = 0.05f;
+  global.camera.fov = 45.0f;
   global.camera.yaw = -90.0f;
   global.camera.lastX = 400;
   global.camera.lastX = 300;
