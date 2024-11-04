@@ -25,3 +25,6 @@ test:
 clean:
 	rm -f $(OBJS) $(TARGET)
 	rm -rf $(OBJDIR)
+
+count:
+	cloc --exclude-list-file=.clocignore .

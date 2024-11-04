@@ -7,9 +7,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "cglm/cam.h"
-#include "cglm/simd/x86.h"
-#include "cglm/vec3.h"
 #include "header/fileHandler.h"
 #include "header/logger.h"
 #include "header/main.h"
@@ -110,6 +107,7 @@ void processInput(GLFWwindow *window) {
   }
 }
 
+char title[100];
 /*** Rendering Functions ***/
 void render(Mesh *mesh) {
   // draw background
@@ -146,7 +144,9 @@ void render(Mesh *mesh) {
     shaderSetMat4(global.shaderProgram, "model", (float *)model);
     glDrawElements(GL_TRIANGLES, mesh->indicesCount, GL_UNSIGNED_INT, 0);
   }
-  // glDrawArrays(GL_TRIANGLES, 0, 36);
+  snprintf(title, sizeof(title), "X:%.2f Y:%.2f", global.camera.cameraPos[0],
+           global.camera.cameraPos[2]);
+  glfwSetWindowTitle(global.window, title);
 }
 
 /*** Init functions ***/
@@ -190,6 +190,17 @@ void init() {
   glm_vec3_copy((vec3){0.0f, 0.0f, -1.0f}, global.camera.cameraFront);
   glm_vec3_copy((vec3){0.0f, 1.0f, 0.0f}, global.camera.cameraUp);
   global.camera.cameraSpeed = 0.05f;
+}
+
+/*** Shutdown functions ***/
+void shutdown(Mesh *mesh) {
+  // cleanup
+  glDeleteVertexArrays(1, &mesh->VAO);
+  glDeleteBuffers(1, &mesh->VBO);
+  glDeleteProgram(global.shaderProgram);
+
+  loggerInfo(ID, "Exit engine");
+  glfwTerminate();
 }
 
 int main(int argc, char **argv) {
@@ -250,13 +261,6 @@ int main(int argc, char **argv) {
     glfwSwapBuffers(global.window);
     glfwPollEvents();
   }
-
-  // cleanup
-  glDeleteVertexArrays(1, &mesh.VAO);
-  glDeleteBuffers(1, &mesh.VBO);
-  glDeleteProgram(global.shaderProgram);
-
-  loggerInfo(ID, "Exit engine");
-  glfwTerminate();
+  shutdown(&mesh);
   return 0;
 }
