@@ -2,6 +2,13 @@
 #include "header/logger.h"
 #include <GLFW/glfw3.h>
 
+void render(Camera *camera) {
+  // setup delta time
+  float currentFrame = glfwGetTime();
+  camera->deltaTime = currentFrame - camera->lastFrame;
+  camera->lastFrame = currentFrame;
+}
+
 void initCamera(Camera *camera) {
   glm_vec3_copy((vec3){0.0f, 0.0f, 3.0f}, camera->cameraPos);
   glm_vec3_copy((vec3){0.0f, 0.0f, -1.0f}, camera->cameraFront);

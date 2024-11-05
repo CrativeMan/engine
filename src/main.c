@@ -101,11 +101,7 @@ void processInput(GLFWwindow *window) {
 
 /*** Rendering Functions ***/
 void renderFrame(Mesh *mesh) {
-  // setup delta time
-  float currentFrame = glfwGetTime();
-  global.camera.deltaTime = currentFrame - global.camera.lastFrame;
-  global.camera.lastFrame = currentFrame;
-
+  render(&global.camera);
   // draw background
   glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
   // color bit for background depth for depth lol
