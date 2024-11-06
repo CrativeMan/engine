@@ -58,7 +58,9 @@ void mousePosCallback(GLFWwindow *window, double xpos, double ypos) {
   mouseCallback(&global.camera, xpos, ypos, &firstMouse);
 }
 
-void processInput(GLFWwindow *window) { inputCallback(window, &global.camera); }
+void processInput(GLFWwindow *window) {
+  inputCallback(window, &global.camera, &global.debug);
+}
 
 /*** Init functions ***/
 void init() {
@@ -127,12 +129,7 @@ void shutdown(Mesh *mesh) {
   glfwTerminate();
 }
 
-int main(int argc, char **argv) {
-  // if draw in wireframe
-  if (argc == 2)
-    if (strcmp(argv[1], " -w"))
-      glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
+int main() {
   init();
 
   loggerInfo(ID, "Started game loop");
@@ -144,6 +141,7 @@ int main(int argc, char **argv) {
     // rendering
     render(&mesh, &global.camera, &global.window, &global.shaderProgram,
            cubePositions);
+    debugRender(&global.debug);
 
     // check all events and swap buffers
     glfwSwapBuffers(global.window.windowId);

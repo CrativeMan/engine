@@ -1,5 +1,6 @@
 #include <GL/glew.h>
 
+#include "GL/gl.h"
 #include "header/renderer.h"
 #include "header/shader.h"
 
@@ -7,6 +8,13 @@
 #define X 0
 #define Y 1
 #define Z 2
+
+void debugRender(bool *debug) {
+  if (*debug == true)
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+  if (*debug == false)
+    glPolygonMode(GL_FRONT_AND_BACK, GL_POLYGON);
+}
 
 void render(Mesh *mesh, Camera *camera, Window *window,
             unsigned int *shaderProgram, vec3 *cubePositions) {

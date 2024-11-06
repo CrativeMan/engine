@@ -18,6 +18,7 @@ typedef struct {
   unsigned int shaderProgram;
   Window window;
   Camera camera;
+  bool debug;
 } Global;
 
 #endif // MAIN_H

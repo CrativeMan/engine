@@ -1,5 +1,7 @@
 #include "header/callbacks.h"
+#include "GLFW/glfw3.h"
 #include "header/camera.h"
+#include "header/logger.h"
 
 void frame_buffer_size_callback(GLFWwindow *window, int width, int height) {
   (void)window;
@@ -38,9 +40,13 @@ void scrollCallback(Camera *camera, float yoffset) {
     camera->fov = 45.0f;
 }
 
-void inputCallback(GLFWwindow *window, Camera *camera) {
+void inputCallback(GLFWwindow *window, Camera *camera, bool *debug) {
   if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
     glfwSetWindowShouldClose(window, GLFW_TRUE);
+  if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS)
+    *debug = true;
+
+  // camera controls
   camera->cameraSpeed = 2.5f * camera->deltaTime;
   if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
     vec3 scaledFront;
