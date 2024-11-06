@@ -173,6 +173,16 @@ void init() {
   global.shaderProgram =
       createShader("src/shaders/vertex.glsl", "src/shaders/fragment.glsl");
 
+  initCamera(&global.camera);
+  char *texture[] = {"src/textures/wall.jpg", "src/textures/awesomeface.png"};
+  mesh = initMesh(vertices, sizeof(vertices), indices, sizeof(indices), texture,
+                  sizeof(texture));
+
+  // enable shader
+  glUseProgram(global.shaderProgram);
+  glUniform1i(glGetUniformLocation(global.shaderProgram, "texture1"), 0);
+  shaderSetInt(global.shaderProgram, "texture2", 1);
+
   loggerInfo(ID, "Initialized game engine");
 }
 
@@ -194,17 +204,7 @@ int main(int argc, char **argv) {
     if (strcmp(argv[1], " -w"))
       glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-  // init
   init();
-  initCamera(&global.camera);
-  char *texture[] = {"src/textures/wall.jpg", "src/textures/awesomeface.png"};
-  mesh = initMesh(vertices, sizeof(vertices), indices, sizeof(indices), texture,
-                  sizeof(texture));
-
-  // enable shader
-  glUseProgram(global.shaderProgram);
-  glUniform1i(glGetUniformLocation(global.shaderProgram, "texture1"), 0);
-  shaderSetInt(global.shaderProgram, "texture2", 1);
 
   loggerInfo(ID, "Started game loop");
   // main loop
