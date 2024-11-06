@@ -9,10 +9,9 @@
 
 #include "cglm/types.h"
 #include "header/callbacks.h"
-#include "header/camera.h"
-#include "header/fileHandler.h"
 #include "header/logger.h"
 #include "header/main.h"
+#include "header/mesh.h"
 #include "header/shader.h"
 
 /*** Defines ***/
@@ -20,12 +19,6 @@
 #define X 0
 #define Y 1
 #define Z 2
-
-typedef struct {
-  unsigned int shaderProgram;
-  Window window;
-  Camera camera;
-} Global;
 Global global;
 Mesh mesh;
 bool firstMouse;
@@ -68,28 +61,7 @@ void mouseScrollCallback(GLFWwindow *window, double xoffset, double yoffset) {
 
 void mousePosCallback(GLFWwindow *window, double xpos, double ypos) {
   (void)window;
-
-  if (firstMouse) {
-    global.camera.lastX = xpos;
-    global.camera.lastY = ypos;
-    firstMouse = false;
-  }
-
-  float xoffset = xpos - global.camera.lastX;
-  float yoffset = global.camera.lastY - ypos;
-
-  global.camera.lastX = xpos;
-  global.camera.lastY = ypos;
-  xoffset *= global.camera.sensitivity;
-  yoffset *= global.camera.sensitivity;
-
-  global.camera.yaw += xoffset;
-  global.camera.pitch += yoffset;
-
-  if (global.camera.pitch > 89.0f)
-    global.camera.pitch = 89.0f;
-  if (global.camera.pitch < -89.0f)
-    global.camera.pitch = -89.0f;
+  mouseCallback(&global.camera, xpos, ypos, &firstMouse);
 }
 
 /*** Input functions ***/
@@ -108,8 +80,9 @@ void renderFrame(Mesh *mesh) {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   // use specific texture
+  // TODO: make loop
   glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_2D, mesh->texture);
+  glBindTexture(GL_TEXTURE_2D, mesh->textures[0]);
 
   // matrices for camera
   mat4 projection;
@@ -155,11 +128,11 @@ void renderFrame(Mesh *mesh) {
            "X:%.2f Y:%.2f Z:%.2f FOV:%.0f", global.camera.cameraPos[X],
            global.camera.cameraPos[Y], global.camera.cameraPos[Z],
            global.camera.fov);
-  glfwSetWindowTitle(global.window.window, global.window.title);
+  glfwSetWindowTitle(global.window.windowId, global.window.title);
 }
 
 /*** Init functions ***/
-void init(Mesh *mesh) {
+void init() {
   if (!glfwInit()) {
     loggerError("GLFW", "Failed to init glfw");
     exit(EXIT_FAILURE);
@@ -170,25 +143,26 @@ void init(Mesh *mesh) {
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
   // create window
-  global.window.window =
+  global.window.windowId =
       glfwCreateWindow(WIN_WIDTH, WIN_HEIGHT, "engine", NULL, NULL);
-  if (global.window.window == NULL) {
+  if (global.window.windowId == NULL) {
     loggerError("GLFW", "Failed to create window");
     glfwTerminate();
     exit(EXIT_FAILURE);
   }
-  glfwMakeContextCurrent(global.window.window);
+  glfwMakeContextCurrent(global.window.windowId);
+  loggerInfo(ID, "Generated window %d", global.window.windowId);
 
-  glfwSetInputMode(global.window.window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-  glfwSetCursorPosCallback(global.window.window, mousePosCallback);
-  glfwSetScrollCallback(global.window.window, mouseScrollCallback);
+  glfwSetInputMode(global.window.windowId, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+  glfwSetCursorPosCallback(global.window.windowId, mousePosCallback);
+  glfwSetScrollCallback(global.window.windowId, mouseScrollCallback);
 
   // init glew
   glewExperimental = GL_TRUE;
   glewInit();
 
   // resize stuff
-  glfwSetFramebufferSizeCallback(global.window.window,
+  glfwSetFramebufferSizeCallback(global.window.windowId,
                                  frame_buffer_size_callback);
   glViewport(0, 0, WIN_WIDTH, WIN_HEIGHT);
 
@@ -198,8 +172,6 @@ void init(Mesh *mesh) {
   // create shader
   global.shaderProgram =
       createShader("src/shaders/vertex.glsl", "src/shaders/fragment.glsl");
-  // texture
-  mesh->texture = loadImage("src/textures/wall.jpg");
 
   loggerInfo(ID, "Initialized game engine");
 }
@@ -210,6 +182,7 @@ void shutdown(Mesh *mesh) {
   glDeleteVertexArrays(1, &mesh->VAO);
   glDeleteBuffers(1, &mesh->VBO);
   glDeleteProgram(global.shaderProgram);
+  deleteMesh(mesh);
 
   loggerInfo(ID, "Exit engine");
   glfwTerminate();
@@ -221,40 +194,12 @@ int main(int argc, char **argv) {
     if (strcmp(argv[1], " -w"))
       glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-  init(&mesh);
+  // init
+  init();
   initCamera(&global.camera);
-  // init mesh
-  glGenVertexArrays(1, &mesh.VAO);
-  glGenBuffers(1, &mesh.VBO);
-  glGenBuffers(1, &mesh.EBO);
-
-  glBindVertexArray(mesh.VAO);
-
-  glBindBuffer(GL_ARRAY_BUFFER, mesh.VBO);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.EBO);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices,
-               GL_STATIC_DRAW);
-
-  // vertex attrib pointers
-  // pointer to the position
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)0);
-  glEnableVertexAttribArray(0);
-  // pointer to the color values
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float),
-                        (void *)(3 * sizeof(float)));
-  glEnableVertexAttribArray(1);
-  // pointer to the tex coords
-  glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float),
-                        (void *)(6 * sizeof(float)));
-  glEnableVertexAttribArray(2);
-
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
-  glBindVertexArray(0);
-  mesh.verticesCount = 40;
-  mesh.indicesCount = 36;
-  mesh.cubePosCount = 10;
+  char *texture[] = {"src/textures/wall.jpg", "src/textures/awesomeface.png"};
+  mesh = initMesh(vertices, sizeof(vertices), indices, sizeof(indices), texture,
+                  sizeof(texture));
 
   // enable shader
   glUseProgram(global.shaderProgram);
@@ -263,15 +208,15 @@ int main(int argc, char **argv) {
 
   loggerInfo(ID, "Started game loop");
   // main loop
-  while (!glfwWindowShouldClose(global.window.window)) {
+  while (!glfwWindowShouldClose(global.window.windowId)) {
     // input
-    processInput(global.window.window);
+    processInput(global.window.windowId);
 
     // rendering
     renderFrame(&mesh);
 
     // check all events and swap buffers
-    glfwSwapBuffers(global.window.window);
+    glfwSwapBuffers(global.window.windowId);
     glfwPollEvents();
   }
   shutdown(&mesh);

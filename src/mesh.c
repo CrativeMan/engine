@@ -1,9 +1,13 @@
 #include "header/mesh.h"
+#include "header/fileHandler.h"
+#include "header/logger.h"
 #include <GL/glew.h>
 #include <stdlib.h>
 
-Mesh initMesh(float *vertices, size_t verticesSize, float *indices,
-              size_t indicesSize, unsigned int *texture, size_t textureSize) {
+#define ID "Mesh"
+
+Mesh initMesh(float *vertices, size_t verticesSize, unsigned int *indices,
+              size_t indicesSize, char *textures[], size_t textureSize) {
   Mesh mesh;
 
   glGenVertexArrays(1, &mesh.VAO);
@@ -36,12 +40,17 @@ Mesh initMesh(float *vertices, size_t verticesSize, float *indices,
 
   mesh.verticesCount = verticesSize / (5 * sizeof(float));
   mesh.indicesCount = indicesSize / sizeof(unsigned int);
-  mesh.textureCount = textureSize / sizeof(unsigned int);
+  mesh.textureCount = textureSize / sizeof(textures[0]);
 
   mesh.textures = (unsigned int *)malloc(textureSize);
   for (size_t i = 0; i < mesh.textureCount; i++) {
-    mesh.textures[i] = texture[i];
+    unsigned int texture = loadImage(textures[i]);
+    mesh.textures[i] = texture;
   }
 
+  loggerInfo(ID, "Created mesh (VAO: %d, VBO:%d, EBO: %d)", mesh.VAO, mesh.VBO,
+             mesh.EBO);
   return mesh;
 }
+
+void deleteMesh(Mesh *mesh) { free(mesh->textures); }
