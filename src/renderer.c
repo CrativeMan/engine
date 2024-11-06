@@ -3,6 +3,7 @@
 #include "header/renderer.h"
 #include "header/shader.h"
 
+#define ID "Renderer"
 #define X 0
 #define Y 1
 #define Z 2
@@ -17,11 +18,6 @@ void render(Mesh *mesh, Camera *camera, Window *window,
   glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
   // color bit for background depth for depth lol
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-  // use specific texture
-  // TODO: make loop
-  glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_2D, mesh->textures[0]);
 
   // matrices for camera
   mat4 projection;
@@ -48,7 +44,8 @@ void render(Mesh *mesh, Camera *camera, Window *window,
   glBindVertexArray(mesh->VAO);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->EBO);
   // loop through all cubes
-  for (int i = 0; i < 10; i++) {
+  int i;
+  for (i = 0; i < 10; i++) {
     mat4 model;
     glm_mat4_identity(model);
     glm_translate(model, cubePositions[i]);

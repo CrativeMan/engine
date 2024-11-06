@@ -10,7 +10,7 @@ typedef struct {
   unsigned int *textures;
   unsigned int verticesCount;
   unsigned int indicesCount;
-  unsigned int textureCount;
+  int textureCount;
 } Mesh;
 
 Mesh initMesh(float *vertices, size_t verticesSize, unsigned int *indices,

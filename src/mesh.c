@@ -43,18 +43,44 @@ Mesh initMesh(float *vertices, size_t verticesSize, unsigned int *indices,
   mesh.textureCount = textureSize / sizeof(textures[0]);
 
   mesh.textures = (unsigned int *)malloc(textureSize);
-  for (size_t i = 0; i < mesh.textureCount; i++) {
+  for (int i = 0; i < mesh.textureCount; i++) {
     unsigned int texture = loadImage(textures[i]);
     mesh.textures[i] = texture;
   }
 
-  loggerInfo(ID, "Created mesh (VAO: %d, VBO:%d, EBO: %d)", mesh.VAO, mesh.VBO,
-             mesh.EBO);
+  // bind texture to shader
+  for (int i = 0; i < mesh.textureCount; i++) {
+    switch (i) {
+    case 0:
+      glActiveTexture(GL_TEXTURE0);
+      break;
+    case 1:
+      glActiveTexture(GL_TEXTURE1);
+      break;
+    case 2:
+      glActiveTexture(GL_TEXTURE2);
+      break;
+    case 3:
+      glActiveTexture(GL_TEXTURE3);
+      break;
+    case 4:
+      glActiveTexture(GL_TEXTURE4);
+      break;
+    case 5:
+      glActiveTexture(GL_TEXTURE5);
+      break;
+    default:
+      loggerWarn(ID, "To many textures (%d) only 5 allowed", mesh.textureCount);
+    }
+    glBindTexture(GL_TEXTURE_2D, mesh.textures[i]);
+  }
+
+  loggerInfo(ID, "Created mesh (VAO: %d, VBO:%d, EBO: %d, TC: %d)", mesh.VAO,
+             mesh.VBO, mesh.EBO, mesh.textureCount);
   return mesh;
 }
 
 void deleteMesh(Mesh *mesh) {
   free(mesh->textures);
-  loggerInfo(ID, "Deleted Mesh (VAO: %d, VBO:%d, EBO: %d)", mesh->VAO,
-             mesh->VBO, mesh->EBO);
+  loggerInfo(ID, "Deleted Mesh (TC: %d)", mesh->textureCount);
 }
