@@ -1,29 +1,23 @@
 #include <GL/glew.h>
-#include <stdlib.h>
 
 #include <GL/gl.h>
 #include <GLFW/glfw3.h>
-#include <cglm/cglm.h>
-#include <stdio.h>
 #include <string.h>
 
-#include "cglm/types.h"
 #include "header/callbacks.h"
 #include "header/logger.h"
 #include "header/main.h"
-#include "header/mesh.h"
+#include "header/renderer.h"
 #include "header/shader.h"
 
 /*** Defines ***/
 #define ID "Engine"
-#define X 0
-#define Y 1
-#define Z 2
+
+/*** Global Variables ***/
 Global global;
 Mesh mesh;
 bool firstMouse;
 
-/*** Global Variables ***/
 float vertices[] = {
     // pos              tex
     -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, // 0
@@ -56,7 +50,7 @@ vec3 cubePositions[] = {
 void mouseScrollCallback(GLFWwindow *window, double xoffset, double yoffset) {
   (void)window;
   (void)xoffset;
-  cameraProcessScrollInput(&global.camera, yoffset);
+  scrollCallback(&global.camera, yoffset);
 }
 
 void mousePosCallback(GLFWwindow *window, double xpos, double ypos) {
@@ -64,72 +58,7 @@ void mousePosCallback(GLFWwindow *window, double xpos, double ypos) {
   mouseCallback(&global.camera, xpos, ypos, &firstMouse);
 }
 
-/*** Input functions ***/
-void processInput(GLFWwindow *window) {
-  if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-    glfwSetWindowShouldClose(window, GLFW_TRUE);
-  cameraProcessInput(window, &global.camera);
-}
-
-/*** Rendering Functions ***/
-void renderFrame(Mesh *mesh) {
-  render(&global.camera);
-  // draw background
-  glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-  // color bit for background depth for depth lol
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-  // use specific texture
-  // TODO: make loop
-  glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_2D, mesh->textures[0]);
-
-  // matrices for camera
-  mat4 projection;
-  glm_mat4_identity(projection);
-  glm_perspective(glm_rad(global.camera.fov), 800.0f / 600.0f, 0.1f, 100.0f,
-                  projection);
-
-  // direction
-  vec3 direction;
-  direction[0] =
-      cos(glm_rad(global.camera.yaw)) * cos(glm_rad(global.camera.pitch));
-  direction[1] = sin(glm_rad(global.camera.pitch));
-  direction[2] =
-      sin(glm_rad(global.camera.yaw)) * cos(glm_rad(global.camera.pitch));
-  glm_vec3_normalize_to(direction, global.camera.cameraFront);
-
-  mat4 view;
-  vec3 center;
-  glm_vec3_add(global.camera.cameraPos, global.camera.cameraFront, center);
-  glm_lookat(global.camera.cameraPos, center, global.camera.cameraUp, view);
-
-  shaderSetMat4(global.shaderProgram, "view", (float *)view);
-  shaderSetMat4(global.shaderProgram, "projection", (float *)projection);
-
-  // use mesh
-  glBindVertexArray(mesh->VAO);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->EBO);
-  // loop through all cubes
-  for (int i = 0; i < 10; i++) {
-    mat4 model;
-    glm_mat4_identity(model);
-    glm_translate(model, cubePositions[i]);
-    float angle = 20.0f * i;
-    if (i % 3 == 0)
-      angle = glfwGetTime() * 25.0f;
-    glm_rotate(model, glm_rad(angle), (vec3){1.0f, 0.3f, 0.5f});
-    shaderSetMat4(global.shaderProgram, "model", (float *)model);
-    glDrawElements(GL_TRIANGLES, mesh->indicesCount, GL_UNSIGNED_INT, 0);
-  }
-
-  // set title
-  snprintf(global.window.title, sizeof(global.window.title),
-           "X:%.2f Y:%.2f Z:%.2f FOV:%.0f", global.camera.cameraPos[X],
-           global.camera.cameraPos[Y], global.camera.cameraPos[Z],
-           global.camera.fov);
-  glfwSetWindowTitle(global.window.windowId, global.window.title);
-}
+void processInput(GLFWwindow *window) { inputCallback(window, &global.camera); }
 
 /*** Init functions ***/
 void init() {
@@ -213,7 +142,8 @@ int main(int argc, char **argv) {
     processInput(global.window.windowId);
 
     // rendering
-    renderFrame(&mesh);
+    render(&mesh, &global.camera, &global.window, &global.shaderProgram,
+           cubePositions);
 
     // check all events and swap buffers
     glfwSwapBuffers(global.window.windowId);

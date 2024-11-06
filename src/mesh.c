@@ -53,4 +53,8 @@ Mesh initMesh(float *vertices, size_t verticesSize, unsigned int *indices,
   return mesh;
 }
 
-void deleteMesh(Mesh *mesh) { free(mesh->textures); }
+void deleteMesh(Mesh *mesh) {
+  free(mesh->textures);
+  loggerInfo(ID, "Deleted Mesh (VAO: %d, VBO:%d, EBO: %d)", mesh->VAO,
+             mesh->VBO, mesh->EBO);
+}
