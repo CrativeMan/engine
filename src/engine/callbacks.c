@@ -1,5 +1,7 @@
 #include "../header/callbacks.h"
 #include "../header/camera.h"
+#include "GLFW/glfw3.h"
+#include "cglm/types.h"
 
 void frame_buffer_size_callback(GLFWwindow *window, int width, int height) {
   (void)window;
@@ -46,6 +48,15 @@ void inputCallback(GLFWwindow *window, Camera *camera, bool *debug) {
 
   // camera controls
   camera->cameraSpeed = 2.5f * camera->deltaTime;
+  if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS ||
+      glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+    vec3 scaledUp;
+    glm_vec3_scale(camera->cameraUp, camera->cameraSpeed, scaledUp);
+    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+      glm_vec3_add(camera->cameraPos, scaledUp, camera->cameraPos);
+    if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+      glm_vec3_sub(camera->cameraPos, scaledUp, camera->cameraPos);
+  }
   if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
     vec3 scaledFront;
     glm_vec3_scale(camera->cameraFront, camera->cameraSpeed, scaledFront);
