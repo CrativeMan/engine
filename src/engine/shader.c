@@ -63,6 +63,7 @@ unsigned int createShader(char *vShaderPath, char *fShaderPath) {
 
   glDeleteShader(vShader);
   glDeleteShader(fShader);
+  glCheckError();
   loggerInfo(ID, "Created shader %d", shaderProgram);
   return shaderProgram;
 }

@@ -1,7 +1,8 @@
-#include "../header/mesh.h"
+#include <GL/glew.h>
+
 #include "../header/fileHandler.h"
 #include "../header/logger.h"
-#include <GL/glew.h>
+#include "../header/mesh.h"
 
 #define ID "Mesh"
 
@@ -74,6 +75,7 @@ Mesh initMesh(float *vertices, size_t verticesSize, unsigned int *indices,
     glBindTexture(GL_TEXTURE_2D, mesh.textures[i]);
   }
 
+  glCheckError();
   loggerInfo(ID, "Created mesh (VAO: %d, VBO:%d, EBO: %d, TC: %d)", mesh.VAO,
              mesh.VBO, mesh.EBO, mesh.textureCount);
   return mesh;
