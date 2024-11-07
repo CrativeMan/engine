@@ -1,8 +1,7 @@
-#include "header/mesh.h"
-#include "header/fileHandler.h"
-#include "header/logger.h"
+#include "../header/mesh.h"
+#include "../header/fileHandler.h"
+#include "../header/logger.h"
 #include <GL/glew.h>
-#include <stdlib.h>
 
 #define ID "Mesh"
 

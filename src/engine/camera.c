@@ -1,6 +1,5 @@
-#include "header/camera.h"
-#include "header/logger.h"
-#include <GLFW/glfw3.h>
+#include "../header/camera.h"
+#include "../header/logger.h"
 
 void initCamera(Camera *camera) {
   glm_vec3_copy((vec3){0.0f, 0.0f, 3.0f}, camera->cameraPos);

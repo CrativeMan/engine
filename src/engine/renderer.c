@@ -1,8 +1,7 @@
 #include <GL/glew.h>
 
-#include "GL/gl.h"
-#include "header/renderer.h"
-#include "header/shader.h"
+#include "../header/renderer.h"
+#include "../header/shader.h"
 
 #define ID "Renderer"
 #define X 0

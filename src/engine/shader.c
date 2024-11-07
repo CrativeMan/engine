@@ -5,9 +5,9 @@
 #include <GLFW/glfw3.h>
 #include <stdio.h>
 
-#include "header/fileHandler.h"
-#include "header/logger.h"
-#include "header/shader.h"
+#include "../header/fileHandler.h"
+#include "../header/logger.h"
+#include "../header/shader.h"
 
 #define ID "Shader"
 

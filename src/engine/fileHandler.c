@@ -6,10 +6,10 @@
 #include <GLFW/glfw3.h>
 #include <string.h>
 
-#include "header/fileHandler.h"
-#include "header/logger.h"
+#include "../header/fileHandler.h"
+#include "../header/logger.h"
 #define STB_IMAGE_IMPLEMENTATION
-#include "header/stb_img.h"
+#include "../header/stb_img.h"
 
 unsigned int loadImage(char *filename) {
   unsigned int texture;

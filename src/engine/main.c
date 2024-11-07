@@ -4,11 +4,11 @@
 #include <GLFW/glfw3.h>
 #include <string.h>
 
-#include "header/callbacks.h"
-#include "header/logger.h"
-#include "header/main.h"
-#include "header/renderer.h"
-#include "header/shader.h"
+#include "../header/callbacks.h"
+#include "../header/logger.h"
+#include "../header/main.h"
+#include "../header/renderer.h"
+#include "../header/shader.h"
 
 /*** Defines ***/
 #define ID "Engine"

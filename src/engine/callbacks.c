@@ -1,7 +1,5 @@
-#include "header/callbacks.h"
-#include "GLFW/glfw3.h"
-#include "header/camera.h"
-#include "header/logger.h"
+#include "../header/callbacks.h"
+#include "../header/camera.h"
 
 void frame_buffer_size_callback(GLFWwindow *window, int width, int height) {
   (void)window;

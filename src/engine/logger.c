@@ -1,10 +1,9 @@
-#include <GL/glew.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
 
-#include "header/logger.h"
+#include "../header/logger.h"
 
 const char *RESET = "\033[0m";
 const char *RED = "\033[0;31m";
