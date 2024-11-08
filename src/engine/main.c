@@ -19,15 +19,15 @@ Mesh mesh;
 bool firstMouse;
 
 float vertices[] = {
-    // pos              tex
-    -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, // 0
-    0.5f,  -0.5f, -0.5f, 0.0f, 1.0f, // 1
-    0.5f,  -0.5f, 0.5f,  1.0f, 1.0f, // 2
-    -0.5f, -0.5f, 0.5f,  1.0f, 0.0f, // 3
-    -0.5f, 0.5f,  -0.5f, 0.0f, 0.0f, // 4
-    0.5f,  0.5f,  -0.5f, 0.0f, 1.0f, // 5
-    0.5f,  0.5f,  0.5f,  1.0f, 1.0f, // 6
-    -0.5f, 0.5f,  0.5f,  1.0f, 0.0f  // 7
+    // pos
+    -0.5f, -0.5f, -0.5f, // 0
+    0.5f,  -0.5f, -0.5f, // 1
+    0.5f,  -0.5f, 0.5f,  // 2
+    -0.5f, -0.5f, 0.5f,  // 3
+    -0.5f, 0.5f,  -0.5f, // 4
+    0.5f,  0.5f,  -0.5f, // 5
+    0.5f,  0.5f,  0.5f,  // 6
+    -0.5f, 0.5f,  0.5f,  // 7
 };
 
 unsigned int indices[] = {
@@ -106,14 +106,14 @@ void init() {
 
   initCamera(&global.camera);
   char *texture[] = {"src/textures/wall.jpg", "src/textures/awesomeface.png"};
-  mesh = initMesh(vertices, sizeof(vertices), indices, sizeof(indices), texture,
-                  sizeof(texture));
+  initializeMesh(&mesh, vertices, sizeof(vertices), indices, sizeof(indices));
 
   // enable shader
   glUseProgram(global.shaderProgram);
   glUniform1i(glGetUniformLocation(global.shaderProgram, "texture1"), 0);
   shaderSetInt(global.shaderProgram, "texture2", 1);
 
+  glCheckError();
   loggerInfo(ID, "Initialized game engine");
 }
 
