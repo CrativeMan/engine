@@ -41,6 +41,8 @@ void initializeMesh(Mesh *self, float *vertices, size_t verticesSize,
 }
 
 void deleteMesh(Mesh *mesh) {
+  glDeleteVertexArrays(1, &mesh->VAO);
+  glDeleteBuffers(1, &mesh->VBO);
   free(mesh->textures);
   loggerInfo(ID, "Deleted Mesh (TC: %d)", mesh->textureCount);
 }

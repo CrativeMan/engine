@@ -8,7 +8,6 @@
 #include "../header/logger.h"
 #include "../header/main.h"
 #include "../header/renderer.h"
-#include "../header/shader.h"
 
 /*** Defines ***/
 #define ID "Engine"
@@ -101,28 +100,27 @@ void init() {
   glEnable(GL_DEPTH_TEST);
 
   // create shader
-  global.shaderProgram =
+  global.shader =
       createShader("src/shaders/vertex.glsl", "src/shaders/fragment.glsl");
 
   initCamera(&global.camera);
-  char *texture[] = {"src/textures/wall.jpg", "src/textures/awesomeface.png"};
   initializeMesh(&mesh, vertices, sizeof(vertices), indices, sizeof(indices));
+  glCheckError();
 
   // enable shader
-  glUseProgram(global.shaderProgram);
-  glUniform1i(glGetUniformLocation(global.shaderProgram, "texture1"), 0);
-  shaderSetInt(global.shaderProgram, "texture2", 1);
-
+  glUseProgram(global.shader.id);
   glCheckError();
+  glUniform1i(glGetUniformLocation(global.shader.id, "texture1"), 0);
+  shaderSetInt(global.shader.id, "texture2", 1);
+  glCheckError();
+
   loggerInfo(ID, "Initialized game engine");
 }
 
 /*** Shutdown functions ***/
 void shutdown(Mesh *mesh) {
   // cleanup
-  glDeleteVertexArrays(1, &mesh->VAO);
-  glDeleteBuffers(1, &mesh->VBO);
-  glDeleteProgram(global.shaderProgram);
+  glDeleteProgram(global.shader.id);
   deleteMesh(mesh);
 
   loggerInfo(ID, "Exit engine");
@@ -135,13 +133,13 @@ int main() {
   loggerInfo(ID, "Started game loop");
   // main loop
   while (!glfwWindowShouldClose(global.window.windowId)) {
+    glCheckError();
     // input
     processInput(global.window.windowId);
 
     // rendering
-    render(&mesh, &global.camera, &global.window, &global.shaderProgram,
+    render(&mesh, &global.camera, &global.window, &global.shader.id,
            cubePositions);
-    debugRender(&global.debug);
 
     // check all events and swap buffers
     glfwSwapBuffers(global.window.windowId);

@@ -3,6 +3,8 @@
 #include <string.h>
 #include <time.h>
 
+#include <GLFW/glfw3.h>
+
 #include "../header/logger.h"
 
 const char *RESET = "\033[0m";

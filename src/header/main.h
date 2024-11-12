@@ -5,6 +5,7 @@
 #include <cglm/cglm.h>
 
 #include "camera.h"
+#include "shader.h"
 
 #define WIN_WIDTH 800
 #define WIN_HEIGHT 600
@@ -15,7 +16,7 @@ typedef struct {
 } Window;
 
 typedef struct {
-  unsigned int shaderProgram;
+  Shader shader;
   Window window;
   Camera camera;
   bool debug;

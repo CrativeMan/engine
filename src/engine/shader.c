@@ -11,17 +11,17 @@
 
 #define ID "Shader"
 
-unsigned int createShader(char *vShaderPath, char *fShaderPath) {
+Shader createShader(char *vShaderPath, char *fShaderPath) {
+  Shader shader;
+  shader.type = SHADER_PROGRAM;
   // vertex shader
+  unsigned int vShader = glCreateShader(GL_VERTEX_SHADER);
   const char *vShaderSource = readFile(vShaderPath);
   if (vShaderSource == NULL) {
     exit(EXIT_FAILURE);
   }
-  unsigned int vShader;
-  vShader = glCreateShader(GL_VERTEX_SHADER);
   glShaderSource(vShader, 1, &vShaderSource, NULL);
   glCompileShader(vShader);
-
   int success;
   char infoLog[512];
   glGetShaderiv(vShader, GL_COMPILE_STATUS, &success);
@@ -30,42 +30,42 @@ unsigned int createShader(char *vShaderPath, char *fShaderPath) {
     loggerError("vShader", "Vertex shader compilation failed\n%s\n", infoLog);
   }
   loggerInfo(ID, "Created vertex shader from %s", vShaderPath);
+  glCheckError();
 
   // fragment shader
+  unsigned int fShader = glCreateShader(GL_FRAGMENT_SHADER);
   const char *fShaderSource = readFile(fShaderPath);
   if (fShaderSource == NULL) {
     exit(EXIT_FAILURE);
   }
-  unsigned int fShader;
-  fShader = glCreateShader(GL_FRAGMENT_SHADER);
   glShaderSource(fShader, 1, &fShaderSource, NULL);
   glCompileShader(fShader);
-
   glGetShaderiv(fShader, GL_COMPILE_STATUS, &success);
   if (!success) {
     glGetShaderInfoLog(fShader, 512, NULL, infoLog);
     loggerError("fShader", "Fragment shader compilation failed\n%s\n", infoLog);
   }
   loggerInfo(ID, "Created fragment shader from %s", fShaderPath);
+  glCheckError();
 
   // shader linking
-  unsigned int shaderProgram;
-  shaderProgram = glCreateProgram();
+  unsigned int shaderProgram = glCreateProgram();
   glAttachShader(shaderProgram, vShader);
   glAttachShader(shaderProgram, fShader);
   glLinkProgram(shaderProgram);
-
   glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
   if (!success) {
     glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
     loggerError("ShaderProgram", "Shader linking failed\n%s\n", infoLog);
   }
 
+  shader.id = shaderProgram;
+
   glDeleteShader(vShader);
   glDeleteShader(fShader);
   glCheckError();
   loggerInfo(ID, "Created shader %d", shaderProgram);
-  return shaderProgram;
+  return shader;
 }
 
 void shaderSetInt(unsigned int id, char *uniform, int value) {

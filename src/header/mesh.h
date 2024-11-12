@@ -19,8 +19,6 @@ typedef struct {
 
 void initializeMesh(Mesh *self, float *vertices, size_t verticesSize,
                     unsigned int *indices, size_t indicesSize);
-Mesh initMesh(float *vertices, size_t verticesSize, unsigned int *indices,
-              size_t indicesSize, char *textures[], size_t textureSize);
 void deleteMesh(Mesh *mesh);
 
 #endif // MESH_H
