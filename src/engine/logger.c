@@ -13,9 +13,9 @@ const char *YELLOW = "\033[0;33m";
 const char *GREEN = "\033[0;32m";
 const char *CYAN = "\033[0;36m";
 
-void _loggerPrintId(char *id);
+void _loggerPrintId(const char *id);
 
-void loggerInfo(char *id, const char *message, ...) {
+void loggerInfo(const char *id, const char *message, ...) {
   _loggerPrintId(id);
 
   // print message and args
@@ -26,7 +26,7 @@ void loggerInfo(char *id, const char *message, ...) {
   printf("\n");
 }
 
-void loggerWarn(char *id, const char *message, ...) {
+void loggerWarn(const char *id, const char *message, ...) {
   printf("%s", YELLOW);
   _loggerPrintId(id);
 
@@ -38,7 +38,7 @@ void loggerWarn(char *id, const char *message, ...) {
   printf("%s\n", RESET);
 }
 
-void loggerError(char *id, const char *message, ...) {
+void loggerError(const char *id, const char *message, ...) {
   printf("%s", RED);
   _loggerPrintId(id);
 
@@ -50,7 +50,7 @@ void loggerError(char *id, const char *message, ...) {
   printf("%s\n", RESET);
 }
 
-void _loggerPrintId(char *id) {
+void _loggerPrintId(const char *id) {
   time_t now = time(NULL);
   struct tm *time_info = localtime(&now);
 

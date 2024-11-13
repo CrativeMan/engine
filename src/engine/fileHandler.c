@@ -52,7 +52,7 @@ const char *readFile(const char *filepath) {
   }
 
   fseek(file, 0, SEEK_END);
-  long fileSize = ftell(file);
+  long unsigned int fileSize = ftell(file);
   fseek(file, 0, SEEK_SET);
 
   char *buffer = (char *)malloc(fileSize + 1);
