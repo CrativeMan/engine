@@ -1,7 +1,6 @@
 #include <GL/glew.h>
 
 #include <GL/gl.h>
-#include <GLFW/glfw3.h>
 #include <string.h>
 
 #include "../header/callbacks.h"
@@ -14,7 +13,6 @@
 
 /*** Global Variables ***/
 Global global;
-Mesh mesh;
 bool firstMouse;
 
 float vertices[] = {
@@ -63,6 +61,7 @@ void processInput(GLFWwindow *window) {
 
 /*** Init functions ***/
 void init() {
+  global.counter = 0;
   if (!glfwInit()) {
     loggerError("GLFW", "Failed to init glfw");
     exit(EXIT_FAILURE);
@@ -73,27 +72,26 @@ void init() {
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
   // create window
-  global.window.windowId =
+  global.window.id =
       glfwCreateWindow(WIN_WIDTH, WIN_HEIGHT, "engine", NULL, NULL);
-  if (global.window.windowId == NULL) {
+  if (global.window.id == NULL) {
     loggerError("GLFW", "Failed to create window");
     glfwTerminate();
     exit(EXIT_FAILURE);
   }
-  glfwMakeContextCurrent(global.window.windowId);
-  loggerInfo(ID, "Generated window %d", global.window.windowId);
+  glfwMakeContextCurrent(global.window.id);
+  loggerInfo(ID, "Generated window %d", global.window.id);
 
-  glfwSetInputMode(global.window.windowId, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-  glfwSetCursorPosCallback(global.window.windowId, mousePosCallback);
-  glfwSetScrollCallback(global.window.windowId, mouseScrollCallback);
+  glfwSetInputMode(global.window.id, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+  glfwSetCursorPosCallback(global.window.id, mousePosCallback);
+  glfwSetScrollCallback(global.window.id, mouseScrollCallback);
 
   // init glew
   glewExperimental = GL_TRUE;
   glewInit();
 
   // resize stuff
-  glfwSetFramebufferSizeCallback(global.window.windowId,
-                                 frame_buffer_size_callback);
+  glfwSetFramebufferSizeCallback(global.window.id, frame_buffer_size_callback);
   glViewport(0, 0, WIN_WIDTH, WIN_HEIGHT);
 
   // enable depth
@@ -104,7 +102,12 @@ void init() {
       createShader("src/shaders/vertex.glsl", "src/shaders/fragment.glsl");
 
   initCamera(&global.camera);
-  initializeMesh(&mesh, vertices, sizeof(vertices), indices, sizeof(indices));
+
+  // init meshes
+  initializeMesh(&global.mesh[0], vertices, sizeof(vertices), indices,
+                 sizeof(indices), &global.counter);
+  initializeMesh(&global.mesh[1], vertices, sizeof(vertices), indices,
+                 sizeof(indices), &global.counter);
   glCheckError();
 
   // enable shader
@@ -118,10 +121,13 @@ void init() {
 }
 
 /*** Shutdown functions ***/
-void shutdown(Mesh *mesh) {
+void shutdown() {
+  loggerInfo(ID, "Shutting down engine");
   // cleanup
   glDeleteProgram(global.shader.id);
-  deleteMesh(mesh);
+  for (int i = 0; i < 2; i++) {
+    deleteMesh(&global.mesh[i]);
+  }
 
   loggerInfo(ID, "Exit engine");
   glfwTerminate();
@@ -132,19 +138,20 @@ int main() {
 
   loggerInfo(ID, "Started game loop");
   // main loop
-  while (!glfwWindowShouldClose(global.window.windowId)) {
+  while (!glfwWindowShouldClose(global.window.id)) {
     glCheckError();
     // input
-    processInput(global.window.windowId);
+    processInput(global.window.id);
 
     // rendering
-    render(&mesh, &global.camera, &global.window, &global.shader.id,
+    render(global.mesh, &global.camera, &global.window, &global.shader.id,
            cubePositions);
 
     // check all events and swap buffers
-    glfwSwapBuffers(global.window.windowId);
+    glfwSwapBuffers(global.window.id);
     glfwPollEvents();
   }
-  shutdown(&mesh);
+  loggerInfo(ID, "Ended game loop");
+  shutdown();
   return 0;
 }

@@ -4,6 +4,7 @@
 #include <stdlib.h>
 
 typedef struct {
+  int id;                     // id of mesh
   unsigned int VAO;           // VertexArrayObject
   unsigned int VBO;           // VertexBufferObject
   unsigned int EBO;           // ElementBuffer Object
@@ -18,7 +19,8 @@ typedef struct {
 #define MESH_NULL {0, 0, 0, 0, 0, 0};
 
 void initializeMesh(Mesh *self, float *vertices, size_t verticesSize,
-                    unsigned int *indices, size_t indicesSize);
+                    unsigned int *indices, size_t indicesSize,
+                    long int *counter);
 void deleteMesh(Mesh *mesh);
 
 #endif // MESH_H

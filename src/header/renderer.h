@@ -3,9 +3,8 @@
 
 #include "camera.h"
 #include "main.h"
-#include "mesh.h"
 
 void debugRender(bool *debug);
-void render(Mesh *mesh, Camera *camera, Window *window,
+void render(Mesh mesh[], Camera *camera, Window *window,
             unsigned int *shaderProgram, vec3 *cubePositions);
 #endif // RENDERER_H

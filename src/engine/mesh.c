@@ -7,7 +7,8 @@
 #define ID "Mesh"
 
 void initializeMesh(Mesh *self, float *vertices, size_t verticesSize,
-                    unsigned int *indices, size_t indicesSize) {
+                    unsigned int *indices, size_t indicesSize,
+                    long int *counter) {
   glGenVertexArrays(1, &self->VAO);
   glGenBuffers(1, &self->VBO);
   glGenBuffers(1, &self->EBO);
@@ -36,13 +37,18 @@ void initializeMesh(Mesh *self, float *vertices, size_t verticesSize,
   glBindVertexArray(0);
   glCheckError();
 
-  loggerInfo(ID, "Created Mesh (vC: %d, iC: %d)", self->verticesCount,
-             self->indicesCount);
+  self->id = *counter;
+  (*counter)++;
+
+  loggerInfo(ID, "Created Mesh (vC: %d, iC: %d) '%d'", self->verticesCount,
+             self->indicesCount, self->id);
 }
 
 void deleteMesh(Mesh *mesh) {
   glDeleteVertexArrays(1, &mesh->VAO);
   glDeleteBuffers(1, &mesh->VBO);
   free(mesh->textures);
-  loggerInfo(ID, "Deleted Mesh (TC: %d)", mesh->textureCount);
+
+  loggerInfo(ID, "Deleted Mesh (vC: %d, iC: %d) '%d'", mesh->verticesCount,
+             mesh->indicesCount, mesh->id);
 }

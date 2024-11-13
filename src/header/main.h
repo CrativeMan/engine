@@ -5,13 +5,14 @@
 #include <cglm/cglm.h>
 
 #include "camera.h"
+#include "mesh.h"
 #include "shader.h"
 
 #define WIN_WIDTH 800
 #define WIN_HEIGHT 600
 
 typedef struct {
-  GLFWwindow *windowId;
+  GLFWwindow *id;
   char title[100];
 } Window;
 
@@ -19,6 +20,8 @@ typedef struct {
   Shader shader;
   Window window;
   Camera camera;
+  Mesh mesh[2];
+  long int counter;
   bool debug;
 } Global;
 
