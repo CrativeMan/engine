@@ -5,6 +5,7 @@
 #include "../header/renderer.h"
 #include "../header/shader.h"
 #include "cglm/affine-pre.h"
+#include "cglm/mat4.h"
 
 #define ID "Renderer"
 #define X 0
@@ -19,7 +20,7 @@ void debugRender(bool *debug) {
 }
 
 void render(Mesh mesh[], Camera *camera, Window *window,
-            unsigned int *shaderProgram, vec3 *cubePositions) {
+            unsigned int *shaderProgram) {
   glCheckError();
   // setup delta time
   float currentFrame = glfwGetTime();
@@ -54,27 +55,19 @@ void render(Mesh mesh[], Camera *camera, Window *window,
   for (int m = 0; m < 2; m++) {
     // use mesh
     glBindVertexArray(mesh[m].VAO);
-    glCheckError();
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh[m].EBO);
-    glCheckError();
+
+    mat4 model;
+    glm_mat4_identity(model);
     // loop through all cubes
     if (m == 0) {
-      int i;
-      for (i = 0; i < 10; i++) {
-        mat4 model;
-        glm_mat4_identity(model);
-        glm_translate(model, cubePositions[i]);
-        float angle = 20.0f * i;
-        if (i % 3 == 0)
-          angle = glfwGetTime() * 25.0f;
-        glm_rotate(model, glm_rad(angle), (vec3){1.0f, 0.3f, 0.5f});
-        shaderSetMat4(*shaderProgram, "model", (float *)model);
-        glDrawElements(GL_TRIANGLES, mesh[m].indicesCount, GL_UNSIGNED_INT, 0);
-      }
+      glUseProgram(*shaderProgram);
+      glm_translate(model, (vec3){-3.0f, 0.0f, 0.0f});
+      shaderSetMat4(*shaderProgram, "model", (float *)model);
+      glDrawElements(GL_TRIANGLES, mesh[m].indicesCount, GL_UNSIGNED_INT, 0);
     } else {
-      mat4 model;
-      glm_mat4_identity(model);
-      glm_translate(model, (vec3){-10.0f, 2.0f, -10.0f});
+      glUseProgram(*shaderProgram);
+      glm_translate(model, (vec3){0.0f, 0.0f, -3.0f});
       shaderSetMat4(*shaderProgram, "model", (float *)model);
       glDrawElements(GL_TRIANGLES, mesh[m].indicesCount, GL_UNSIGNED_INT, 0);
     }

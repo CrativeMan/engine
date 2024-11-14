@@ -36,13 +36,6 @@ unsigned int indices[] = {
     3, 2, 6, 3, 6, 7, // back
 };
 
-vec3 cubePositions[] = {
-    {0.0f, 0.0f, 0.0f},     {2.0f, 5.0f, -15.0f}, {-1.5f, -2.2f, -2.5f},
-    {-3.8f, -2.0f, -12.3f}, {2.4f, -0.4f, -3.5f}, {-1.7f, 3.0f, -7.5f},
-    {1.3f, -2.0f, -2.5f},   {1.5f, 2.0f, -2.5f},  {1.5f, 0.2f, -1.5f},
-    {-1.3f, 1.0f, -1.5f},
-};
-
 /*** Callback Functions ***/
 void mouseScrollCallback(GLFWwindow *window, double xoffset, double yoffset) {
   (void)window;
@@ -111,11 +104,6 @@ void init() {
   glCheckError();
 
   // enable shader
-  glUseProgram(global.shader.id);
-  glCheckError();
-  glUniform1i(glGetUniformLocation(global.shader.id, "texture1"), 0);
-  shaderSetInt(global.shader.id, "texture2", 1);
-  glCheckError();
 
   loggerInfo(ID, "Initialized game engine");
 }
@@ -144,8 +132,7 @@ int main() {
     processInput(global.window.id);
 
     // rendering
-    render(global.mesh, &global.camera, &global.window, &global.shader.id,
-           cubePositions);
+    render(global.mesh, &global.camera, &global.window, &global.shader.id);
 
     // check all events and swap buffers
     glfwSwapBuffers(global.window.id);

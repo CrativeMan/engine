@@ -6,5 +6,5 @@
 
 void debugRender(bool *debug);
 void render(Mesh mesh[], Camera *camera, Window *window,
-            unsigned int *shaderProgram, vec3 *cubePositions);
+            unsigned int *shaderProgram);
 #endif // RENDERER_H
