@@ -30,3 +30,5 @@ clean:
 
 count:
 	cloc --exclude-list-file=.clocignore .
+run:
+	./bin/main
