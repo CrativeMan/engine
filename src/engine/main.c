@@ -1,8 +1,5 @@
 #include <GL/glew.h>
 
-#include <GL/gl.h>
-#include <string.h>
-
 #include "../header/callbacks.h"
 #include "../header/logger.h"
 #include "../header/main.h"

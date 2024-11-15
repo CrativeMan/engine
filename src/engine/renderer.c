@@ -22,6 +22,7 @@ void debugRender(bool *debug) {
 void render(Mesh mesh[], Camera *camera, Window *window,
             unsigned int *shaderProgram) {
   glCheckError();
+  glUseProgram(*shaderProgram);
   // setup delta time
   float currentFrame = glfwGetTime();
   camera->deltaTime = currentFrame - camera->lastFrame;
@@ -61,12 +62,10 @@ void render(Mesh mesh[], Camera *camera, Window *window,
     glm_mat4_identity(model);
     // loop through all cubes
     if (m == 0) {
-      glUseProgram(*shaderProgram);
       glm_translate(model, (vec3){-3.0f, 0.0f, 0.0f});
       shaderSetMat4(*shaderProgram, "model", (float *)model);
       glDrawElements(GL_TRIANGLES, mesh[m].indicesCount, GL_UNSIGNED_INT, 0);
     } else {
-      glUseProgram(*shaderProgram);
       glm_translate(model, (vec3){0.0f, 0.0f, -3.0f});
       shaderSetMat4(*shaderProgram, "model", (float *)model);
       glDrawElements(GL_TRIANGLES, mesh[m].indicesCount, GL_UNSIGNED_INT, 0);
