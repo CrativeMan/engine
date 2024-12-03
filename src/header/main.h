@@ -17,7 +17,7 @@ typedef struct {
 } Window;
 
 typedef struct {
-  Shader shader;
+  Shader shader[2];
   Window window;
   Camera camera;
   Mesh mesh[2];

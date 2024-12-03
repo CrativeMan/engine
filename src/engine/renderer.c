@@ -5,12 +5,15 @@
 #include "../header/renderer.h"
 #include "../header/shader.h"
 #include "cglm/affine-pre.h"
+#include "cglm/affine.h"
 #include "cglm/mat4.h"
 
 #define ID "Renderer"
 #define X 0
 #define Y 1
 #define Z 2
+
+vec3 lightPos = {1.2f, 1.0f, 2.0f};
 
 void debugRender(bool *debug) {
   if (*debug == true)
@@ -19,24 +22,37 @@ void debugRender(bool *debug) {
     glPolygonMode(GL_FRONT_AND_BACK, GL_POLYGON);
 }
 
-void render(Mesh mesh[], Camera *camera, Window *window,
-            unsigned int *shaderProgram) {
+void render(Mesh mesh[], Camera *camera, Window *window, Shader shader[]) {
   glCheckError();
-  glUseProgram(*shaderProgram);
   // setup delta time
   float currentFrame = glfwGetTime();
   camera->deltaTime = currentFrame - camera->lastFrame;
   camera->lastFrame = currentFrame;
   // draw background
-  glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
   // color bit for background depth for depth lol
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  // matrices for camera
+  glUseProgram(shader[0].id);
+  shaderSetVec3(shader[0].id, "objectColor", (float[3]){1.0f, 0.5f, 0.31f});
+  shaderSetVec3(shader[0].id, "lightColor", (float[3]){1.0f, 1.0f, 1.0f});
+
+  // view/projection marix
   mat4 projection;
   glm_mat4_identity(projection);
   glm_perspective(glm_rad(camera->fov), 800.0f / 600.0f, 0.1f, 100.0f,
                   projection);
+  mat4 view;
+  vec3 center;
+  glm_vec3_add(camera->cameraPos, camera->cameraFront, center);
+  glm_lookat(camera->cameraPos, center, camera->cameraUp, view);
+  shaderSetMat4(shader[0].id, "view", (float *)view);
+  shaderSetMat4(shader[0].id, "projection", (float *)projection);
+
+  // world transformation
+  mat4 model;
+  glm_mat4_identity(model);
+  shaderSetMat4(shader[0].id, "model", (float *)model);
 
   // direction
   vec3 direction;
@@ -45,32 +61,21 @@ void render(Mesh mesh[], Camera *camera, Window *window,
   direction[Z] = sin(glm_rad(camera->yaw)) * cos(glm_rad(camera->pitch));
   glm_vec3_normalize_to(direction, camera->cameraFront);
 
-  mat4 view;
-  vec3 center;
-  glm_vec3_add(camera->cameraPos, camera->cameraFront, center);
-  glm_lookat(camera->cameraPos, center, camera->cameraUp, view);
+  // render cube
+  glBindVertexArray(mesh[0].VAO);
+  glDrawArrays(GL_TRIANGLES, 0, 36);
 
-  shaderSetMat4(*shaderProgram, "view", (float *)view);
-  shaderSetMat4(*shaderProgram, "projection", (float *)projection);
+  /*** Light cube ***/
+  glUseProgram(shader[1].id);
+  shaderSetMat4(shader[1].id, "projection", (float *)projection);
+  shaderSetMat4(shader[1].id, "view", (float *)view);
+  glm_mat4_identity(model);
+  glm_translate(model, lightPos);
+  glm_scale(model, (vec3){0.2f, 0.2f, 0.2f});
+  shaderSetMat4(shader[1].id, "model", (float *)model);
 
-  for (int m = 0; m < 2; m++) {
-    // use mesh
-    glBindVertexArray(mesh[m].VAO);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh[m].EBO);
-
-    mat4 model;
-    glm_mat4_identity(model);
-    // loop through all cubes
-    if (m == 0) {
-      glm_translate(model, (vec3){-3.0f, 0.0f, 0.0f});
-      shaderSetMat4(*shaderProgram, "model", (float *)model);
-      glDrawElements(GL_TRIANGLES, mesh[m].indicesCount, GL_UNSIGNED_INT, 0);
-    } else {
-      glm_translate(model, (vec3){0.0f, 0.0f, -3.0f});
-      shaderSetMat4(*shaderProgram, "model", (float *)model);
-      glDrawElements(GL_TRIANGLES, mesh[m].indicesCount, GL_UNSIGNED_INT, 0);
-    }
-  }
+  glBindVertexArray(mesh[1].VAO);
+  glDrawArrays(GL_TRIANGLES, 0, 36);
 
   // set title
   snprintf(window->title, sizeof(window->title),

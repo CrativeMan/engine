@@ -3,6 +3,7 @@
 #include <string.h>
 #include <time.h>
 
+#include "../header/defs.h"
 #include "../header/logger.h"
 
 const char *RESET = "\033[0m";
@@ -13,12 +14,20 @@ const char *CYAN = "\033[0;36m";
 
 void _loggerPrintId(const char *id);
 
+void logToFile(const char *message, ...) {
+  va_list args;
+  va_start(args, message);
+  WRITE_LOG(message, args);
+  va_end(args);
+}
+
 void loggerInfo(const char *id, const char *message, ...) {
   _loggerPrintId(id);
 
   // print message and args
   va_list args;
   va_start(args, message);
+  WRITE_LOG(message, args);
   vprintf(message, args);
   va_end(args);
   printf("\n");
@@ -31,6 +40,7 @@ void loggerWarn(const char *id, const char *message, ...) {
   // print message and args
   va_list args;
   va_start(args, message);
+  WRITE_LOG(message, args);
   vprintf(message, args);
   va_end(args);
   printf("%s\n", RESET);
@@ -43,6 +53,7 @@ void loggerError(const char *id, const char *message, ...) {
   // print message and args
   va_list args;
   va_start(args, message);
+  WRITE_LOG(message, args);
   vprintf(message, args);
   va_end(args);
   printf("%s\n", RESET);

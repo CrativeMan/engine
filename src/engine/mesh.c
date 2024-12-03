@@ -7,8 +7,30 @@
 #define ID "Mesh"
 
 void initializeMesh(Mesh *self, float *vertices, size_t verticesSize,
-                    unsigned int *indices, size_t indicesSize,
                     long int *counter) {
+  glGenVertexArrays(1, &self->VAO);
+  glGenBuffers(1, &self->VBO);
+  glCheckError();
+
+  self->verticesSize = verticesSize;
+  self->verticesCount = self->verticesSize / sizeof(float);
+
+  glBindBuffer(GL_ARRAY_BUFFER, self->VBO);
+  glBufferData(GL_ARRAY_BUFFER, self->verticesSize, vertices, GL_STATIC_DRAW);
+
+  glBindVertexArray(self->VAO);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
+  glEnableVertexAttribArray(0);
+
+  self->id = *counter;
+  (*counter)++;
+
+  loggerInfo(ID, "Created Mesh (vC: %d) '%d'", self->verticesCount, self->id);
+}
+
+void initializeMeshWithEBO(Mesh *self, float *vertices, size_t verticesSize,
+                           unsigned int *indices, size_t indicesSize,
+                           long int *counter) {
   glGenVertexArrays(1, &self->VAO);
   glGenBuffers(1, &self->VBO);
   glGenBuffers(1, &self->EBO);

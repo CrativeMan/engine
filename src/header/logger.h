@@ -3,6 +3,7 @@
 
 #include <GL/gl.h>
 
+void logToFile(const char *message, ...);
 void loggerInfo(const char *id, const char *message, ...);
 void loggerWarn(const char *id, const char *message, ...);
 void loggerError(const char *id, const char *message, ...);

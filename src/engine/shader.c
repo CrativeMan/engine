@@ -76,6 +76,10 @@ void shaderSetFloat(unsigned int id, char *uniform, float value) {
   glUniform1f(glGetUniformLocation(id, uniform), value);
 }
 
+void shaderSetVec3(unsigned int id, char *uniform, float value[3]) {
+  glUniform3fv(glGetUniformLocation(id, uniform), 1, value);
+}
+
 void shaderSetMat4(unsigned int id, char *uniform, float *value) {
   glUniformMatrix4fv(glGetUniformLocation(id, uniform), 1, GL_FALSE, value);
 }

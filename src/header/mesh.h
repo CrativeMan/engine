@@ -19,8 +19,10 @@ typedef struct {
 #define MESH_NULL {0, 0, 0, 0, 0, 0};
 
 void initializeMesh(Mesh *self, float *vertices, size_t verticesSize,
-                    unsigned int *indices, size_t indicesSize,
                     long int *counter);
+void initializeMeshWithEBO(Mesh *self, float *vertices, size_t verticesSize,
+                           unsigned int *indices, size_t indicesSize,
+                           long int *counter);
 void deleteMesh(Mesh *mesh);
 
 #endif // MESH_H

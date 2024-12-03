@@ -1,0 +1,45 @@
+
+[13:45:54] src/engine/logger.c:30: Generated window 2069897096
+[13:45:54] src/engine/logger.c:30: Generated char* from file ''
+[13:45:54] src/engine/logger.c:30: Created vertex shader from 
+[13:45:54] src/engine/logger.c:30: Generated char* from file ''
+[13:45:54] src/engine/logger.c:30: Created fragment shader from 
+[13:45:54] src/engine/logger.c:30: Created shader 2069896456
+[13:45:54] src/engine/logger.c:30: Generated char* from file ''
+[13:45:54] src/engine/logger.c:30: Created vertex shader from 
+[13:45:54] src/engine/logger.c:30: Generated char* from file ''
+[13:45:54] src/engine/logger.c:30: Created fragment shader from 
+[13:45:54] src/engine/logger.c:30: Created shader 2069896456
+[13:45:54] src/engine/logger.c:30: Initiated camera
+[13:45:54] src/engine/logger.c:30: Created Mesh (vC: 2069897096) '0'
+[13:45:54] src/engine/logger.c:30: Created Mesh (vC: 2069897096) '0'
+[13:45:54] src/engine/logger.c:30: Initialized game engine
+[13:45:54] src/engine/logger.c:30: Started game loop
+[13:45:54] src/engine/logger.c:30: Ended game loop
+[13:45:54] src/engine/logger.c:30: Shutting down engine
+[13:45:54] src/engine/logger.c:30: Deleted Mesh (vC: 2069897112, iC: 0) '0'
+[13:45:54] src/engine/logger.c:30: Deleted Mesh (vC: 2069897112, iC: 0) '0'
+[13:45:54] src/engine/logger.c:30: Exit engine
+[13:45:54] src/engine/logger.c:20: --------------------------------------------
+[13:46:01] src/engine/logger.c:30: Generated window -1375856600
+[13:46:01] src/engine/logger.c:30: Generated char* from file ''
+[13:46:01] src/engine/logger.c:30: Created vertex shader from 
+[13:46:01] src/engine/logger.c:30: Generated char* from file ''
+[13:46:01] src/engine/logger.c:30: Created fragment shader from 
+[13:46:01] src/engine/logger.c:30: Created shader -1375857240
+[13:46:01] src/engine/logger.c:30: Generated char* from file ''
+[13:46:01] src/engine/logger.c:30: Created vertex shader from 
+[13:46:01] src/engine/logger.c:30: Generated char* from file ''
+[13:46:01] src/engine/logger.c:30: Created fragment shader from 
+[13:46:01] src/engine/logger.c:30: Created shader -1375857240
+[13:46:01] src/engine/logger.c:30: Initiated camera
+[13:46:01] src/engine/logger.c:30: Created Mesh (vC: -1375856600) '0'
+[13:46:01] src/engine/logger.c:30: Created Mesh (vC: -1375856600) '0'
+[13:46:01] src/engine/logger.c:30: Initialized game engine
+[13:46:01] src/engine/logger.c:30: Started game loop
+[13:46:02] src/engine/logger.c:30: Ended game loop
+[13:46:02] src/engine/logger.c:30: Shutting down engine
+[13:46:02] src/engine/logger.c:30: Deleted Mesh (vC: -1375856584, iC: 0) '0'
+[13:46:02] src/engine/logger.c:30: Deleted Mesh (vC: -1375856584, iC: 0) '0'
+[13:46:02] src/engine/logger.c:30: Exit engine
+[13:46:02] src/engine/logger.c:20: --------------------------------------------

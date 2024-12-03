@@ -13,24 +13,23 @@ Global global;
 bool firstMouse;
 
 float vertices[] = {
-    // pos
-    -0.5f, -0.5f, -0.5f, // 0
-    0.5f,  -0.5f, -0.5f, // 1
-    0.5f,  -0.5f, 0.5f,  // 2
-    -0.5f, -0.5f, 0.5f,  // 3
-    -0.5f, 0.5f,  -0.5f, // 4
-    0.5f,  0.5f,  -0.5f, // 5
-    0.5f,  0.5f,  0.5f,  // 6
-    -0.5f, 0.5f,  0.5f,  // 7
-};
+    -0.5f, -0.5f, -0.5f, 0.5f,  -0.5f, -0.5f, 0.5f,  0.5f,  -0.5f,
+    0.5f,  0.5f,  -0.5f, -0.5f, 0.5f,  -0.5f, -0.5f, -0.5f, -0.5f,
 
-unsigned int indices[] = {
-    0, 1, 2, 0, 2, 3, // down
-    4, 5, 6, 4, 6, 7, // up
-    1, 2, 6, 1, 6, 5, // right
-    3, 0, 4, 3, 4, 7, // left
-    0, 4, 5, 0, 1, 5, // front
-    3, 2, 6, 3, 6, 7, // back
+    -0.5f, -0.5f, 0.5f,  0.5f,  -0.5f, 0.5f,  0.5f,  0.5f,  0.5f,
+    0.5f,  0.5f,  0.5f,  -0.5f, 0.5f,  0.5f,  -0.5f, -0.5f, 0.5f,
+
+    -0.5f, 0.5f,  0.5f,  -0.5f, 0.5f,  -0.5f, -0.5f, -0.5f, -0.5f,
+    -0.5f, -0.5f, -0.5f, -0.5f, -0.5f, 0.5f,  -0.5f, 0.5f,  0.5f,
+
+    0.5f,  0.5f,  0.5f,  0.5f,  0.5f,  -0.5f, 0.5f,  -0.5f, -0.5f,
+    0.5f,  -0.5f, -0.5f, 0.5f,  -0.5f, 0.5f,  0.5f,  0.5f,  0.5f,
+
+    -0.5f, -0.5f, -0.5f, 0.5f,  -0.5f, -0.5f, 0.5f,  -0.5f, 0.5f,
+    0.5f,  -0.5f, 0.5f,  -0.5f, -0.5f, 0.5f,  -0.5f, -0.5f, -0.5f,
+
+    -0.5f, 0.5f,  -0.5f, 0.5f,  0.5f,  -0.5f, 0.5f,  0.5f,  0.5f,
+    0.5f,  0.5f,  0.5f,  -0.5f, 0.5f,  0.5f,  -0.5f, 0.5f,  -0.5f,
 };
 
 /*** Callback Functions ***/
@@ -88,16 +87,16 @@ void init() {
   glEnable(GL_DEPTH_TEST);
 
   // create shader
-  global.shader =
+  global.shader[0] =
       createShader("src/shaders/vertex.glsl", "src/shaders/fragment.glsl");
+  global.shader[1] =
+      createShader("src/shaders/vLight.glsl", "src/shaders/fLight.glsl");
 
   initCamera(&global.camera);
 
   // init meshes
-  initializeMesh(&global.mesh[0], vertices, sizeof(vertices), indices,
-                 sizeof(indices), &global.counter);
-  initializeMesh(&global.mesh[1], vertices, sizeof(vertices), indices,
-                 sizeof(indices), &global.counter);
+  initializeMesh(&global.mesh[0], vertices, sizeof(vertices), &global.counter);
+  initializeMesh(&global.mesh[1], vertices, sizeof(vertices), &global.counter);
   glCheckError();
 
   // enable shader
@@ -109,12 +108,14 @@ void init() {
 void shutdown() {
   loggerInfo(ID, "Shutting down engine");
   // cleanup
-  glDeleteProgram(global.shader.id);
   for (int i = 0; i < 2; i++) {
     deleteMesh(&global.mesh[i]);
+    glDeleteProgram(global.shader[i].id);
   }
 
   loggerInfo(ID, "Exit engine");
+  logToFile("--------------------------------------------");
+
   glfwTerminate();
 }
 
@@ -129,7 +130,7 @@ int main() {
     processInput(global.window.id);
 
     // rendering
-    render(global.mesh, &global.camera, &global.window, &global.shader.id);
+    render(global.mesh, &global.camera, &global.window, global.shader);
 
     // check all events and swap buffers
     glfwSwapBuffers(global.window.id);
