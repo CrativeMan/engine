@@ -4,9 +4,6 @@
 #include "../header/logger.h"
 #include "../header/renderer.h"
 #include "../header/shader.h"
-#include "cglm/affine-pre.h"
-#include "cglm/affine.h"
-#include "cglm/mat4.h"
 
 #define ID "Renderer"
 #define X 0
@@ -38,6 +35,14 @@ void render(Mesh mesh[], Camera *camera, Window *window, Shader shader[]) {
   shaderSetVec3(shader[0].id, "lightColor", (float[3]){1.0f, 1.0f, 1.0f});
   shaderSetVec3(shader[0].id, "lightPos", lightPos);
   shaderSetVec3(shader[0].id, "viewPos", camera->cameraPos);
+
+  shaderSetVec3(shader[0].id, "material.ambient",
+                (float[3]){1.0f, 0.5f, 0.31f});
+  shaderSetVec3(shader[0].id, "material.diffuse",
+                (float[3]){1.0f, 0.5f, 0.31f});
+  shaderSetVec3(shader[0].id, "material.specular",
+                (float[3]){0.5f, 0.5f, 0.5f});
+  shaderSetFloat(shader[0].id, "material.shininess", 32.0f);
 
   // view/projection marix
   mat4 projection;
@@ -72,6 +77,7 @@ void render(Mesh mesh[], Camera *camera, Window *window, Shader shader[]) {
   shaderSetMat4(shader[1].id, "projection", (float *)projection);
   shaderSetMat4(shader[1].id, "view", (float *)view);
   glm_mat4_identity(model);
+  lightPos[Y] = sin(currentFrame / 2.0f) * 1.0f;
   glm_translate(model, lightPos);
   glm_scale(model, (vec3){0.2f, 0.2f, 0.2f});
   shaderSetMat4(shader[1].id, "model", (float *)model);
