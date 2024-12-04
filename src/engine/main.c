@@ -4,6 +4,7 @@
 #include "../header/logger.h"
 #include "../header/main.h"
 #include "../header/renderer.h"
+#include "GL/glext.h"
 
 /*** Defines ***/
 #define ID "Engine"
@@ -13,23 +14,47 @@ Global global;
 bool firstMouse;
 
 float vertices[] = {
-    -0.5f, -0.5f, -0.5f, 0.5f,  -0.5f, -0.5f, 0.5f,  0.5f,  -0.5f,
-    0.5f,  0.5f,  -0.5f, -0.5f, 0.5f,  -0.5f, -0.5f, -0.5f, -0.5f,
+    -0.5f, -0.5f, -0.5f, 0.0f,  0.0f,  -1.0f, // 1
+    0.5f,  -0.5f, -0.5f, 0.0f,  0.0f,  -1.0f, // 2
+    0.5f,  0.5f,  -0.5f, 0.0f,  0.0f,  -1.0f, // 3
+    0.5f,  0.5f,  -0.5f, 0.0f,  0.0f,  -1.0f, // 4
+    -0.5f, 0.5f,  -0.5f, 0.0f,  0.0f,  -1.0f, // 5
+    -0.5f, -0.5f, -0.5f, 0.0f,  0.0f,  -1.0f, // 6
 
-    -0.5f, -0.5f, 0.5f,  0.5f,  -0.5f, 0.5f,  0.5f,  0.5f,  0.5f,
-    0.5f,  0.5f,  0.5f,  -0.5f, 0.5f,  0.5f,  -0.5f, -0.5f, 0.5f,
+    -0.5f, -0.5f, 0.5f,  0.0f,  0.0f,  1.0f, // 7
+    0.5f,  -0.5f, 0.5f,  0.0f,  0.0f,  1.0f, // 8
+    0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f, // 9
+    0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f, // 10
+    -0.5f, 0.5f,  0.5f,  0.0f,  0.0f,  1.0f, // 11
+    -0.5f, -0.5f, 0.5f,  0.0f,  0.0f,  1.0f, // 12
 
-    -0.5f, 0.5f,  0.5f,  -0.5f, 0.5f,  -0.5f, -0.5f, -0.5f, -0.5f,
-    -0.5f, -0.5f, -0.5f, -0.5f, -0.5f, 0.5f,  -0.5f, 0.5f,  0.5f,
+    -0.5f, 0.5f,  0.5f,  -1.0f, 0.0f,  0.0f, // 13
+    -0.5f, 0.5f,  -0.5f, -1.0f, 0.0f,  0.0f, // 14
+    -0.5f, -0.5f, -0.5f, -1.0f, 0.0f,  0.0f, // 15
+    -0.5f, -0.5f, -0.5f, -1.0f, 0.0f,  0.0f, // 16
+    -0.5f, -0.5f, 0.5f,  -1.0f, 0.0f,  0.0f, // 17
+    -0.5f, 0.5f,  0.5f,  -1.0f, 0.0f,  0.0f, // 18
 
-    0.5f,  0.5f,  0.5f,  0.5f,  0.5f,  -0.5f, 0.5f,  -0.5f, -0.5f,
-    0.5f,  -0.5f, -0.5f, 0.5f,  -0.5f, 0.5f,  0.5f,  0.5f,  0.5f,
+    0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f, // 19
+    0.5f,  0.5f,  -0.5f, 1.0f,  0.0f,  0.0f, // 20
+    0.5f,  -0.5f, -0.5f, 1.0f,  0.0f,  0.0f, // 21
+    0.5f,  -0.5f, -0.5f, 1.0f,  0.0f,  0.0f, // 22
+    0.5f,  -0.5f, 0.5f,  1.0f,  0.0f,  0.0f, // 23
+    0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f, // 24
 
-    -0.5f, -0.5f, -0.5f, 0.5f,  -0.5f, -0.5f, 0.5f,  -0.5f, 0.5f,
-    0.5f,  -0.5f, 0.5f,  -0.5f, -0.5f, 0.5f,  -0.5f, -0.5f, -0.5f,
+    -0.5f, -0.5f, -0.5f, 0.0f,  -1.0f, 0.0f, // 25
+    0.5f,  -0.5f, -0.5f, 0.0f,  -1.0f, 0.0f, // 26
+    0.5f,  -0.5f, 0.5f,  0.0f,  -1.0f, 0.0f, // 27
+    0.5f,  -0.5f, 0.5f,  0.0f,  -1.0f, 0.0f, // 28
+    -0.5f, -0.5f, 0.5f,  0.0f,  -1.0f, 0.0f, // 29
+    -0.5f, -0.5f, -0.5f, 0.0f,  -1.0f, 0.0f, // 30
 
-    -0.5f, 0.5f,  -0.5f, 0.5f,  0.5f,  -0.5f, 0.5f,  0.5f,  0.5f,
-    0.5f,  0.5f,  0.5f,  -0.5f, 0.5f,  0.5f,  -0.5f, 0.5f,  -0.5f,
+    -0.5f, 0.5f,  -0.5f, 0.0f,  1.0f,  0.0f, // 31
+    0.5f,  0.5f,  -0.5f, 0.0f,  1.0f,  0.0f, // 32
+    0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f, // 33
+    0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f, // 34
+    -0.5f, 0.5f,  0.5f,  0.0f,  1.0f,  0.0f, // 35
+    -0.5f, 0.5f,  -0.5f, 0.0f,  1.0f,  0.0f  // 36
 };
 
 /*** Callback Functions ***/
@@ -95,8 +120,9 @@ void init() {
   initCamera(&global.camera);
 
   // init meshes
-  initializeMesh(&global.mesh[0], vertices, sizeof(vertices), &global.counter);
-  initializeMesh(&global.mesh[1], vertices, sizeof(vertices), &global.counter);
+  // initializeMesh(&global.mesh[0], vertices, sizeof(vertices),
+  // &global.counter); initializeMesh(&global.mesh[1], vertices,
+  // sizeof(vertices), &global.counter);
   glCheckError();
 
   // enable shader
@@ -121,6 +147,8 @@ void shutdown() {
 
 int main() {
   init();
+
+  tempMeshes(global.mesh, vertices, sizeof(vertices), (int[]){0, 1});
 
   loggerInfo(ID, "Started game loop");
   // main loop

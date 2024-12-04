@@ -18,6 +18,7 @@ typedef struct {
 
 #define MESH_NULL {0, 0, 0, 0, 0, 0};
 
+void tempMeshes(Mesh mesh[], float *vertices, int size, int id[]);
 void initializeMesh(Mesh *self, float *vertices, size_t verticesSize,
                     long int *counter);
 void initializeMeshWithEBO(Mesh *self, float *vertices, size_t verticesSize,

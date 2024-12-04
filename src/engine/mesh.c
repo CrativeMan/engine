@@ -2,9 +2,46 @@
 
 #include "../header/logger.h"
 #include "../header/mesh.h"
-#include "GL/glext.h"
 
 #define ID "Mesh"
+
+void tempMeshes(Mesh mesh[], float *vertices, int size, int id[]) {
+  unsigned int VBO, cubeVAO;
+  glGenVertexArrays(1, &cubeVAO);
+  glGenBuffers(1, &VBO);
+
+  glBindBuffer(GL_ARRAY_BUFFER, VBO);
+  glBufferData(GL_ARRAY_BUFFER, size, vertices, GL_STATIC_DRAW);
+
+  glBindVertexArray(cubeVAO);
+
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)0);
+  glEnableVertexAttribArray(0);
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float),
+                        (void *)(3 * sizeof(float)));
+  glEnableVertexAttribArray(1);
+
+  unsigned int lightCubeVAO;
+  glGenVertexArrays(1, &lightCubeVAO);
+  glBindVertexArray(lightCubeVAO);
+
+  glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)0);
+  glEnableVertexAttribArray(0);
+
+  mesh[0].VAO = cubeVAO;
+  mesh[0].VBO = VBO;
+  mesh[0].verticesSize = size;
+  mesh[0].verticesCount = size / sizeof(float);
+  mesh[0].id = id[0];
+
+  mesh[1].VAO = lightCubeVAO;
+  mesh[1].VBO = VBO;
+  mesh[1].verticesSize = size;
+  mesh[1].verticesCount = size / sizeof(float);
+  mesh[1].id = id[1];
+}
 
 void initializeMesh(Mesh *self, float *vertices, size_t verticesSize,
                     long int *counter) {
@@ -51,8 +88,10 @@ void initializeMeshWithEBO(Mesh *self, float *vertices, size_t verticesSize,
                GL_STATIC_DRAW);
   glCheckError();
 
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)0);
   glEnableVertexAttribArray(0);
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)0);
+  glEnableVertexAttribArray(1);
   glCheckError();
 
   glBindBuffer(GL_ARRAY_BUFFER, 0);

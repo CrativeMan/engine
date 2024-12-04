@@ -20,5 +20,6 @@ typedef struct {
 } Camera;
 
 void initCamera(Camera *camera);
+void cameraMove(GLFWwindow *window, Camera *camera);
 
 #endif // CAMERA_H

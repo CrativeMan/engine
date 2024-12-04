@@ -36,6 +36,7 @@ void render(Mesh mesh[], Camera *camera, Window *window, Shader shader[]) {
   glUseProgram(shader[0].id);
   shaderSetVec3(shader[0].id, "objectColor", (float[3]){1.0f, 0.5f, 0.31f});
   shaderSetVec3(shader[0].id, "lightColor", (float[3]){1.0f, 1.0f, 1.0f});
+  shaderSetVec3(shader[0].id, "lightPos", lightPos);
 
   // view/projection marix
   mat4 projection;

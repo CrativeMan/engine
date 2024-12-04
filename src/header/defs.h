@@ -1,6 +1,7 @@
 #ifndef DEFS_H
 #define DEFS_H
 
+#include <stdio.h>
 #include <time.h>
 
 #define GET_HUMAN_READABLE_TIME(buffer)                                        \
@@ -18,6 +19,7 @@
     }                                                                          \
   } while (0)
 
+// Define the macro for logging
 #define WRITE_LOG(message, ...)                                                \
   do {                                                                         \
     char time_buffer[100];                                                     \
