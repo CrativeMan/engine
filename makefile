@@ -21,6 +21,7 @@ $(OBJDIR):
 	mkdir -p $(OBJDIR)
 
 $(TARGETMAIN): $(OBJS) | $(TARGETDIR)
+	mkdir -p logs
 	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
 
 clean:
@@ -28,6 +29,7 @@ clean:
 	rm -rf $(OBJDIR)
 	rm -rf $(TARGETDIR)
 tail:
+	echo "" >> logs/engine.log
 	tail -f logs/engine.log
 count:
 	cloc --exclude-list-file=.clocignore .
