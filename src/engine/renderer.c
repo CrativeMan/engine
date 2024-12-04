@@ -32,10 +32,25 @@ void render(Mesh mesh[], Camera *camera, Window *window, Shader shader[]) {
 
   glUseProgram(shader[0].id);
   shaderSetVec3(shader[0].id, "objectColor", (float[3]){1.0f, 0.5f, 0.31f});
-  shaderSetVec3(shader[0].id, "lightColor", (float[3]){1.0f, 1.0f, 1.0f});
-  shaderSetVec3(shader[0].id, "lightPos", lightPos);
   shaderSetVec3(shader[0].id, "viewPos", camera->cameraPos);
 
+  // set light
+  vec3 lightColor;
+  lightColor[X] = sin(currentFrame * 2.0f);
+  lightColor[Y] = sin(currentFrame * 0.7f);
+  lightColor[Z] = sin(currentFrame * 1.3f);
+
+  vec3 diffuseColor;
+  glm_vec3_mul(lightColor, (vec3){0.5f, 0.5f, 0.5f}, diffuseColor);
+  vec3 ambientColor;
+  glm_vec3_mul(diffuseColor, (vec3){0.2f, 0.2f, 0.2f}, ambientColor);
+
+  shaderSetVec3(shader[0].id, "light.position", lightPos);
+  shaderSetVec3(shader[0].id, "light.ambient", ambientColor);
+  shaderSetVec3(shader[0].id, "light.diffuse", diffuseColor);
+  shaderSetVec3(shader[0].id, "light.specular", (vec3){1.0f, 1.0f, 1.0f});
+
+  // set material
   shaderSetVec3(shader[0].id, "material.ambient",
                 (float[3]){1.0f, 0.5f, 0.31f});
   shaderSetVec3(shader[0].id, "material.diffuse",
@@ -81,6 +96,8 @@ void render(Mesh mesh[], Camera *camera, Window *window, Shader shader[]) {
   glm_translate(model, lightPos);
   glm_scale(model, (vec3){0.2f, 0.2f, 0.2f});
   shaderSetMat4(shader[1].id, "model", (float *)model);
+
+  shaderSetVec3(shader[1].id, "objectColor", diffuseColor);
 
   glBindVertexArray(mesh[1].VAO);
   glDrawArrays(GL_TRIANGLES, 0, 36);
