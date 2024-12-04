@@ -3,7 +3,6 @@
 #include <string.h>
 #include <time.h>
 
-#include "../header/defs.h"
 #include "../header/logger.h"
 
 const char *RESET = "\033[0m";
@@ -12,58 +11,85 @@ const char *YELLOW = "\033[0;33m";
 const char *GREEN = "\033[0;32m";
 const char *CYAN = "\033[0;36m";
 
-void _loggerPrintId(const char *id);
+void loggerPrintId(const char *id, FILE *file);
 
 void logToFile(const char *message, ...) {
   va_list args;
-  va_start(args, message);
-  WRITE_LOG(message, args);
-  va_end(args);
+  FILE *file = fopen("logs/engine.log", "a");
+  if (file != NULL) {
+    va_start(args, message);
+    vfprintf(file, message, args);
+    fprintf(file, "\n");
+    fclose(file);
+    va_end(args);
+  }
 }
 
 void loggerInfo(const char *id, const char *message, ...) {
-  _loggerPrintId(id);
-
-  // print message and args
   va_list args;
+  FILE *file = fopen("logs/engine.log", "a");
+  loggerPrintId(id, file);
+  if (file != NULL) {
+    va_start(args, message);
+    vfprintf(file, message, args);
+    fprintf(file, "\n");
+    fclose(file);
+    va_end(args);
+  }
+  // print message and args
   va_start(args, message);
-  WRITE_LOG(message, args);
   vprintf(message, args);
-  va_end(args);
   printf("\n");
+  va_end(args);
 }
 
 void loggerWarn(const char *id, const char *message, ...) {
-  printf("%s", YELLOW);
-  _loggerPrintId(id);
+  va_list args;
+  FILE *file = fopen("logs/engine.log", "a");
+  loggerPrintId(id, file);
+  if (file != NULL) {
+    va_start(args, message);
+    vfprintf(file, message, args);
+    fprintf(file, "\n");
+    fclose(file);
+    va_end(args);
+  }
 
   // print message and args
-  va_list args;
+  printf("%s", YELLOW);
   va_start(args, message);
-  WRITE_LOG(message, args);
   vprintf(message, args);
-  va_end(args);
   printf("%s\n", RESET);
+  va_end(args);
 }
 
 void loggerError(const char *id, const char *message, ...) {
-  printf("%s", RED);
-  _loggerPrintId(id);
+  va_list args;
+  FILE *file = fopen("logs/engine.log", "a");
+  loggerPrintId(id, file);
+  if (file != NULL) {
+    va_start(args, message);
+    vfprintf(file, message, args);
+    fprintf(file, "\n");
+    fclose(file);
+    va_end(args);
+  }
 
   // print message and args
-  va_list args;
+  printf("%s", RED);
   va_start(args, message);
-  WRITE_LOG(message, args);
   vprintf(message, args);
-  va_end(args);
   printf("%s\n", RESET);
+  va_end(args);
 }
 
-void _loggerPrintId(const char *id) {
+void loggerPrintId(const char *id, FILE *file) {
   time_t now = time(NULL);
   struct tm *time_info = localtime(&now);
 
   // Print the timestamp and ID
+  fprintf(file, "[%02d:%02d:%02d] [%s]\t", time_info->tm_hour,
+          time_info->tm_min, time_info->tm_sec, id);
   printf("[%02d:%02d:%02d] [%s]\t", time_info->tm_hour, time_info->tm_min,
          time_info->tm_sec, id);
 }

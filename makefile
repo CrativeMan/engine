@@ -27,8 +27,11 @@ clean:
 	rm -f $(OBJS) $(TARGET)
 	rm -rf $(OBJDIR)
 	rm -rf $(TARGETDIR)
-
+tail:
+	tail -f logs/engine.log
 count:
 	cloc --exclude-list-file=.clocignore .
 run:
 	./bin/main
+
+.PHONY: all clean tail count run
