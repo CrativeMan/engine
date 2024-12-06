@@ -1,14 +1,15 @@
 #ifndef MESH_H
 #define MESH_H
 
+#include "texture.h"
 #include <stdlib.h>
 
 typedef struct {
-  int id;                     // id of mesh
-  unsigned int VAO;           // VertexArrayObject
-  unsigned int VBO;           // VertexBufferObject
-  unsigned int EBO;           // ElementBuffer Object
-  unsigned int *textures;     // textures array TODO: turn into texture struct
+  int id;           // id of mesh
+  unsigned int VAO; // VertexArrayObject
+  unsigned int VBO; // VertexBufferObject
+  unsigned int EBO; // ElementBuffer Object
+  Texture texture;
   unsigned int verticesCount; // num of vertices
   unsigned int verticesSize;  // size of vertices
   unsigned int indicesCount;  // num of indices

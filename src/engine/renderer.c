@@ -4,6 +4,7 @@
 #include "../header/logger.h"
 #include "../header/renderer.h"
 #include "../header/shader.h"
+#include "GL/gl.h"
 
 #define ID "Renderer"
 #define X 0
@@ -12,13 +13,6 @@
 
 vec3 lightPos = {1.2f, 1.0f, 2.0f};
 
-void debugRender(bool *debug) {
-  if (*debug == true)
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-  if (*debug == false)
-    glPolygonMode(GL_FRONT_AND_BACK, GL_POLYGON);
-}
-
 void render(Mesh mesh[], Camera *camera, Window *window, Shader shader[]) {
   glCheckError();
   // setup delta time
@@ -26,7 +20,7 @@ void render(Mesh mesh[], Camera *camera, Window *window, Shader shader[]) {
   camera->deltaTime = currentFrame - camera->lastFrame;
   camera->lastFrame = currentFrame;
   // draw background
-  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+  glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
   // color bit for background depth for depth lol
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -35,10 +29,7 @@ void render(Mesh mesh[], Camera *camera, Window *window, Shader shader[]) {
   shaderSetVec3(shader[0].id, "viewPos", camera->cameraPos);
 
   // set light
-  vec3 lightColor;
-  lightColor[X] = sin(currentFrame * 2.0f);
-  lightColor[Y] = sin(currentFrame * 0.7f);
-  lightColor[Z] = sin(currentFrame * 1.3f);
+  vec3 lightColor = {1.0f, 1.0f, 1.0f};
 
   vec3 diffuseColor;
   glm_vec3_mul(lightColor, (vec3){0.5f, 0.5f, 0.5f}, diffuseColor);
@@ -51,10 +42,6 @@ void render(Mesh mesh[], Camera *camera, Window *window, Shader shader[]) {
   shaderSetVec3(shader[0].id, "light.specular", (vec3){1.0f, 1.0f, 1.0f});
 
   // set material
-  shaderSetVec3(shader[0].id, "material.ambient",
-                (float[3]){1.0f, 0.5f, 0.31f});
-  shaderSetVec3(shader[0].id, "material.diffuse",
-                (float[3]){1.0f, 0.5f, 0.31f});
   shaderSetVec3(shader[0].id, "material.specular",
                 (float[3]){0.5f, 0.5f, 0.5f});
   shaderSetFloat(shader[0].id, "material.shininess", 32.0f);
@@ -83,6 +70,10 @@ void render(Mesh mesh[], Camera *camera, Window *window, Shader shader[]) {
   direction[Z] = sin(glm_rad(camera->yaw)) * cos(glm_rad(camera->pitch));
   glm_vec3_normalize_to(direction, camera->cameraFront);
 
+  // set deffuse map
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, mesh[0].texture.id);
+
   // render cube
   glBindVertexArray(mesh[0].VAO);
   glDrawArrays(GL_TRIANGLES, 0, 36);
@@ -92,7 +83,7 @@ void render(Mesh mesh[], Camera *camera, Window *window, Shader shader[]) {
   shaderSetMat4(shader[1].id, "projection", (float *)projection);
   shaderSetMat4(shader[1].id, "view", (float *)view);
   glm_mat4_identity(model);
-  lightPos[Y] = sin(currentFrame / 2.0f) * 1.0f;
+  lightPos[Y] = sin(currentFrame / 2.0f) * 2.3f;
   glm_translate(model, lightPos);
   glm_scale(model, (vec3){0.2f, 0.2f, 0.2f});
   shaderSetMat4(shader[1].id, "model", (float *)model);

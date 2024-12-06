@@ -5,6 +5,5 @@
 #include "main.h"
 #include "shader.h"
 
-void debugRender(bool *debug);
 void render(Mesh mesh[], Camera *camera, Window *window, Shader shader[]);
 #endif // RENDERER_H

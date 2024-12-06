@@ -9,6 +9,7 @@ typedef struct {
 } Shader;
 
 Shader createShader(char *vShaderPath, char *fShaderPath);
+void useShader(unsigned int id);
 void shaderSetFloat(unsigned int id, char *uniform, float value);
 void shaderSetInt(unsigned int id, char *uniform, int value);
 void shaderSetVec3(unsigned int id, char *uniform, float value[3]);

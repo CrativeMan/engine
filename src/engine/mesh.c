@@ -15,11 +15,14 @@ void tempMeshes(Mesh mesh[], float *vertices, int size, int id[]) {
 
   glBindVertexArray(cubeVAO);
 
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)0);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)0);
   glEnableVertexAttribArray(0);
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float),
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
                         (void *)(3 * sizeof(float)));
   glEnableVertexAttribArray(1);
+  glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
+                        (void *)(6 * sizeof(float)));
+  glEnableVertexAttribArray(2);
 
   unsigned int lightCubeVAO;
   glGenVertexArrays(1, &lightCubeVAO);
@@ -27,7 +30,7 @@ void tempMeshes(Mesh mesh[], float *vertices, int size, int id[]) {
 
   glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)0);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)0);
   glEnableVertexAttribArray(0);
 
   mesh[0].VAO = cubeVAO;
@@ -108,7 +111,6 @@ void initializeMeshWithEBO(Mesh *self, float *vertices, size_t verticesSize,
 void deleteMesh(Mesh *mesh) {
   glDeleteVertexArrays(1, &mesh->VAO);
   glDeleteBuffers(1, &mesh->VBO);
-  free(mesh->textures);
 
   loggerInfo(ID, "Deleted Mesh (vC: %d, iC: %d) '%d'", mesh->verticesCount,
              mesh->indicesCount, mesh->id);

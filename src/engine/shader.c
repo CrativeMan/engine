@@ -68,6 +68,10 @@ Shader createShader(char *vShaderPath, char *fShaderPath) {
   return shader;
 }
 
+void useShader(unsigned int id) {
+  glUseProgram(id);
+}
+
 void shaderSetInt(unsigned int id, char *uniform, int value) {
   glUniform1i(glGetUniformLocation(id, uniform), value);
 }
