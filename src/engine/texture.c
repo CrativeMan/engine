@@ -12,7 +12,7 @@ Texture loadTexture(char const *path) {
   unsigned char *data = stbi_load(path, &texture.width, &texture.height,
                                   &texture.nrComponents, 0);
   if (data) {
-    GLenum format;
+    GLenum format = GL_RGBA;
     if (texture.nrComponents == 1)
       format = GL_RED;
     else if (texture.nrComponents == 3)

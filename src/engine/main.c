@@ -115,11 +115,14 @@ void init() {
   initMeshes(global.mesh, vertices, sizeof(vertices), (int[]){0, 1});
   global.mesh[0].texture[0] = loadTexture("src/textures/container2.png");
   global.mesh[0].texture[1] = loadTexture("src/textures/container2_specular.png");
+  global.mesh[0].texture[2] = loadTexture("src/textures/matrix.jpg");
   glCheckError();
 
   useShader(global.shader[0].id);
   shaderSetInt(global.shader[0].id, "material.diffuse", 0);
   shaderSetInt(global.shader[0].id, "material.specular", 1);
+  shaderSetInt(global.shader[0].id, "material.emision", 2);
+  glCheckError();
 
   loggerInfo(ID, "Initialized game engine");
 }

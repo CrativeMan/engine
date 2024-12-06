@@ -67,6 +67,9 @@ void render(Mesh mesh[], Camera *camera, Window *window, Shader shader[]) {
   // set specular map
   glActiveTexture(GL_TEXTURE1);
   glBindTexture(GL_TEXTURE_2D, mesh[0].texture[1].id);
+  // set emision map
+  glActiveTexture(GL_TEXTURE2);
+  glBindTexture(GL_TEXTURE_2D, mesh[0].texture[2].id);
 
   // render cube
   glBindVertexArray(mesh[0].VAO);

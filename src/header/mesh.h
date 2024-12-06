@@ -9,7 +9,7 @@ typedef struct {
   unsigned int VAO; // VertexArrayObject
   unsigned int VBO; // VertexBufferObject
   unsigned int EBO; // ElementBuffer Object
-  Texture texture[2];
+  Texture texture[3];
   unsigned int verticesCount; // num of vertices
   unsigned int verticesSize;  // size of vertices
   unsigned int indicesCount;  // num of indices
