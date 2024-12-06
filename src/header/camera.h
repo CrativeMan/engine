@@ -17,6 +17,7 @@ typedef struct {
   float lastX;
   float lastY;
   float sensitivity;
+  float fps;
 } Camera;
 
 void initCamera(Camera *camera);

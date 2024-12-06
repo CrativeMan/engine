@@ -145,6 +145,7 @@ int main() {
   loggerInfo(ID, "Started game loop");
   // main loop
   while (!glfwWindowShouldClose(global.window.id)) {
+    // print fps
     glCheckError();
     // input
     processInput(global.window.id);

@@ -88,6 +88,14 @@ void render(Mesh mesh[], Camera *camera, Window *window, Shader shader[]) {
   glBindVertexArray(mesh[1].VAO);
   glDrawArrays(GL_TRIANGLES, 0, 36);
 
+  camera->fps = 1 / camera->deltaTime;
+  static float fpsTimer = 0.0f;
+  fpsTimer += camera->deltaTime;
+  if (fpsTimer >= 1.0f) {
+    loggerInfo(ID, "FPS: %.2f", camera->fps);
+    fpsTimer = 0.0f;
+  }
+
   // set title
   snprintf(window->title, sizeof(window->title),
            "X:%.2f Y:%.2f Z:%.2f FOV:%.0f", camera->cameraPos[X],
