@@ -5,6 +5,7 @@
 #include "../header/renderer.h"
 #include "../header/shader.h"
 #include "GL/gl.h"
+#include "cglm/types.h"
 
 #define ID "Renderer"
 #define X 0
@@ -20,30 +21,20 @@ void render(Mesh mesh[], Camera *camera, Window *window, Shader shader[]) {
   camera->deltaTime = currentFrame - camera->lastFrame;
   camera->lastFrame = currentFrame;
   // draw background
-  glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+  glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
   // color bit for background depth for depth lol
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   glUseProgram(shader[0].id);
-  shaderSetVec3(shader[0].id, "objectColor", (float[3]){1.0f, 0.5f, 0.31f});
+  shaderSetVec3(shader[0].id, "light.position", lightPos);
   shaderSetVec3(shader[0].id, "viewPos", camera->cameraPos);
 
-  // set light
-  vec3 lightColor = {1.0f, 1.0f, 1.0f};
-
-  vec3 diffuseColor;
-  glm_vec3_mul(lightColor, (vec3){0.5f, 0.5f, 0.5f}, diffuseColor);
-  vec3 ambientColor;
-  glm_vec3_mul(diffuseColor, (vec3){0.2f, 0.2f, 0.2f}, ambientColor);
-
-  shaderSetVec3(shader[0].id, "light.position", lightPos);
-  shaderSetVec3(shader[0].id, "light.ambient", ambientColor);
-  shaderSetVec3(shader[0].id, "light.diffuse", diffuseColor);
+  // light
+  shaderSetVec3(shader[0].id, "light.ambient", (vec3){0.2f, 0.2f, 0.2f});
+  shaderSetVec3(shader[0].id, "light.diffuse", (vec3){0.5f, 0.5f, 0.5f});
   shaderSetVec3(shader[0].id, "light.specular", (vec3){1.0f, 1.0f, 1.0f});
 
   // set material
-  shaderSetVec3(shader[0].id, "material.specular",
-                (float[3]){0.5f, 0.5f, 0.5f});
   shaderSetFloat(shader[0].id, "material.shininess", 32.0f);
 
   // view/projection marix
@@ -72,7 +63,10 @@ void render(Mesh mesh[], Camera *camera, Window *window, Shader shader[]) {
 
   // set deffuse map
   glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_2D, mesh[0].texture.id);
+  glBindTexture(GL_TEXTURE_2D, mesh[0].texture[0].id);
+  // set specular map
+  glActiveTexture(GL_TEXTURE1);
+  glBindTexture(GL_TEXTURE_2D, mesh[0].texture[1].id);
 
   // render cube
   glBindVertexArray(mesh[0].VAO);
@@ -87,8 +81,6 @@ void render(Mesh mesh[], Camera *camera, Window *window, Shader shader[]) {
   glm_translate(model, lightPos);
   glm_scale(model, (vec3){0.2f, 0.2f, 0.2f});
   shaderSetMat4(shader[1].id, "model", (float *)model);
-
-  shaderSetVec3(shader[1].id, "objectColor", diffuseColor);
 
   glBindVertexArray(mesh[1].VAO);
   glDrawArrays(GL_TRIANGLES, 0, 36);

@@ -9,7 +9,7 @@ typedef struct {
   unsigned int VAO; // VertexArrayObject
   unsigned int VBO; // VertexBufferObject
   unsigned int EBO; // ElementBuffer Object
-  Texture texture;
+  Texture texture[2];
   unsigned int verticesCount; // num of vertices
   unsigned int verticesSize;  // size of vertices
   unsigned int indicesCount;  // num of indices
@@ -19,12 +19,7 @@ typedef struct {
 
 #define MESH_NULL {0, 0, 0, 0, 0, 0};
 
-void tempMeshes(Mesh mesh[], float *vertices, int size, int id[]);
-void initializeMesh(Mesh *self, float *vertices, size_t verticesSize,
-                    long int *counter);
-void initializeMeshWithEBO(Mesh *self, float *vertices, size_t verticesSize,
-                           unsigned int *indices, size_t indicesSize,
-                           long int *counter);
+void initMeshes(Mesh mesh[], float *vertices, int size, int id[]);
 void deleteMesh(Mesh *mesh);
 
 #endif // MESH_H

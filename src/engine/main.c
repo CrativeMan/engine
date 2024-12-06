@@ -112,12 +112,14 @@ void init() {
   global.shader[1] =
       createShader("src/shaders/vLight.glsl", "src/shaders/fLight.glsl");
   initCamera(&global.camera);
-  tempMeshes(global.mesh, vertices, sizeof(vertices), (int[]){0, 1});
-  global.mesh[0].texture = loadTexture("src/textures/container2.png");
+  initMeshes(global.mesh, vertices, sizeof(vertices), (int[]){0, 1});
+  global.mesh[0].texture[0] = loadTexture("src/textures/container2.png");
+  global.mesh[0].texture[1] = loadTexture("src/textures/container2_specular.png");
   glCheckError();
 
   useShader(global.shader[0].id);
   shaderSetInt(global.shader[0].id, "material.diffuse", 0);
+  shaderSetInt(global.shader[0].id, "material.specular", 1);
 
   loggerInfo(ID, "Initialized game engine");
 }
