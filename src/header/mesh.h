@@ -1,7 +1,7 @@
 #ifndef MESH_H
 #define MESH_H
 
-#include "texture.h"
+#include "image.h"
 #include <stdlib.h>
 
 typedef struct {
@@ -9,7 +9,7 @@ typedef struct {
   unsigned int VAO; // VertexArrayObject
   unsigned int VBO; // VertexBufferObject
   unsigned int EBO; // ElementBuffer Object
-  Texture texture[3];
+  Texture texture[2];
   unsigned int verticesCount; // num of vertices
   unsigned int verticesSize;  // size of vertices
   unsigned int indicesCount;  // num of indices

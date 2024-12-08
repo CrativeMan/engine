@@ -12,7 +12,13 @@
 #define Y 1
 #define Z 2
 
-vec3 lightPos = {1.2f, 1.0f, 2.0f};
+vec3 lightingDirection = {-0.2f, -1.0f, -0.3f};
+vec3 cubePositions[] = {
+    {0.0f, 0.0f, 0.0f},     {2.0f, 5.0f, -15.0f}, {-1.5f, -2.2f, -2.5f},
+    {-3.8f, -2.0f, -12.3f}, {2.4f, -0.4f, -3.5f}, {-1.7f, 3.0f, -7.5f},
+    {1.3f, -2.0f, -2.5f},   {1.5f, 2.0f, -2.5f},  {1.5f, 0.2f, -1.5f},
+    {-1.3f, 1.0f, -1.5f},
+};
 
 void render(Mesh mesh[], Camera *camera, Window *window, Shader shader[]) {
   glCheckError();
@@ -26,7 +32,7 @@ void render(Mesh mesh[], Camera *camera, Window *window, Shader shader[]) {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   glUseProgram(shader[0].id);
-  shaderSetVec3(shader[0].id, "light.position", lightPos);
+  shaderSetVec3(shader[0].id, "light.direction", lightingDirection);
   shaderSetVec3(shader[0].id, "viewPos", camera->cameraPos);
 
   // light
@@ -49,11 +55,6 @@ void render(Mesh mesh[], Camera *camera, Window *window, Shader shader[]) {
   shaderSetMat4(shader[0].id, "view", (float *)view);
   shaderSetMat4(shader[0].id, "projection", (float *)projection);
 
-  // world transformation
-  mat4 model;
-  glm_mat4_identity(model);
-  shaderSetMat4(shader[0].id, "model", (float *)model);
-
   // direction
   vec3 direction;
   direction[X] = cos(glm_rad(camera->yaw)) * cos(glm_rad(camera->pitch));
@@ -67,27 +68,20 @@ void render(Mesh mesh[], Camera *camera, Window *window, Shader shader[]) {
   // set specular map
   glActiveTexture(GL_TEXTURE1);
   glBindTexture(GL_TEXTURE_2D, mesh[0].texture[1].id);
-  // set emision map
-  glActiveTexture(GL_TEXTURE2);
-  glBindTexture(GL_TEXTURE_2D, mesh[0].texture[2].id);
 
   // render cube
-  glBindVertexArray(mesh[0].VAO);
-  glDrawArrays(GL_TRIANGLES, 0, 36);
+  mat4 model;
+  for (unsigned int i = 0; i < 10; i++) {
+    glm_mat4_identity(model);
+    glm_translate(model, cubePositions[i]);
+    float angle = 20.0f * i;
+    glm_rotate(model, glm_rad(angle), (vec3){1.0f, 0.3f, 0.5f});
+    shaderSetMat4(shader[0].id, "model", (float *)model);
 
-  /*** Light cube ***/
-  glUseProgram(shader[1].id);
-  shaderSetMat4(shader[1].id, "projection", (float *)projection);
-  shaderSetMat4(shader[1].id, "view", (float *)view);
-  glm_mat4_identity(model);
-  lightPos[Y] = sin(currentFrame / 2.0f) * 2.3f;
-  glm_translate(model, lightPos);
-  glm_scale(model, (vec3){0.2f, 0.2f, 0.2f});
-  shaderSetMat4(shader[1].id, "model", (float *)model);
+    glDrawArrays(GL_TRIANGLES, 0, 36);
+  }
 
-  glBindVertexArray(mesh[1].VAO);
-  glDrawArrays(GL_TRIANGLES, 0, 36);
-
+  // handle fps
   camera->fps = 1 / camera->deltaTime;
   static float fpsTimer = 0.0f;
   fpsTimer += camera->deltaTime;

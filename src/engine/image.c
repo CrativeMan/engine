@@ -1,7 +1,8 @@
 #include <GL/glew.h>
+#include <GLFW/glfw3.h>
 
+#include "../header/image.h"
 #include "../header/logger.h"
-#include "../header/texture.h"
 #define STB_IMAGE_IMPLEMENTATION
 #include "../header/stb_img.h"
 
@@ -32,8 +33,9 @@ Texture loadTexture(char const *path) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     stbi_image_free(data);
+    loggerInfo("Image", "Loaded image from '%s'", path);
   } else {
-    loggerError("Texture", "Failed to load texture '%s'", path);
+    loggerError("Image", "Failed to load image from '%s'", path);
     stbi_image_free(data);
   }
 

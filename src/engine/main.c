@@ -4,8 +4,6 @@
 #include "../header/logger.h"
 #include "../header/main.h"
 #include "../header/renderer.h"
-#include "../header/texture.h"
-#include "GL/glext.h"
 
 /*** Defines ***/
 #define ID "Engine"
@@ -115,13 +113,11 @@ void init() {
   initMeshes(global.mesh, vertices, sizeof(vertices), (int[]){0, 1});
   global.mesh[0].texture[0] = loadTexture("src/textures/container2.png");
   global.mesh[0].texture[1] = loadTexture("src/textures/container2_specular.png");
-  global.mesh[0].texture[2] = loadTexture("src/textures/matrix.jpg");
   glCheckError();
 
   useShader(global.shader[0].id);
   shaderSetInt(global.shader[0].id, "material.diffuse", 0);
   shaderSetInt(global.shader[0].id, "material.specular", 1);
-  shaderSetInt(global.shader[0].id, "material.emision", 2);
   glCheckError();
 
   loggerInfo(ID, "Initialized game engine");
@@ -145,15 +141,9 @@ int main() {
   loggerInfo(ID, "Started game loop");
   // main loop
   while (!glfwWindowShouldClose(global.window.id)) {
-    // print fps
     glCheckError();
-    // input
     processInput(global.window.id);
-
-    // rendering
     render(global.mesh, &global.camera, &global.window, global.shader);
-
-    // check all events and swap buffers
     glfwSwapBuffers(global.window.id);
     glfwPollEvents();
   }

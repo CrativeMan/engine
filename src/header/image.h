@@ -1,5 +1,5 @@
-#ifndef TEXTURE_H
-#define TEXTURE_H
+#ifndef IMAGE_H
+#define IMAGE_H
 
 typedef struct {
   unsigned int id;
@@ -10,4 +10,4 @@ typedef struct {
 
 Texture loadTexture(char const *path);
 
-#endif // TEXTURE_H
+#endif // IMAGE_H
