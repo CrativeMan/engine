@@ -5,6 +5,9 @@
 #include "../header/renderer.h"
 #include "../header/shader.h"
 #include "GL/gl.h"
+#include "cglm/affine-pre.h"
+#include "cglm/affine.h"
+#include "cglm/mat4.h"
 #include "cglm/types.h"
 
 #define ID "Renderer"
@@ -12,6 +15,7 @@
 #define Y 1
 #define Z 2
 
+vec3 lightPos = {1.0f, 1.0f, 2.0f};
 vec3 cubePositions[] = {
     {0.0f, 0.0f, 0.0f},     {2.0f, 5.0f, -15.0f}, {-1.5f, -2.2f, -2.5f},
     {-3.8f, -2.0f, -12.3f}, {2.4f, -0.4f, -3.5f}, {-1.7f, 3.0f, -7.5f},
@@ -31,13 +35,17 @@ void render(Mesh mesh[], Camera *camera, Window *window, Shader shader[]) {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   glUseProgram(shader[0].id);
-  shaderSetVec3(shader[0].id, "light.direction", (vec3){-0.2f, -1.0f, -0.3f});
+  shaderSetVec3(shader[0].id, "light.position", lightPos);
   shaderSetVec3(shader[0].id, "viewPos", camera->cameraPos);
 
   // light
   shaderSetVec3(shader[0].id, "light.ambient", (vec3){0.2f, 0.2f, 0.2f});
   shaderSetVec3(shader[0].id, "light.diffuse", (vec3){0.5f, 0.5f, 0.5f});
   shaderSetVec3(shader[0].id, "light.specular", (vec3){1.0f, 1.0f, 1.0f});
+
+  shaderSetFloat(shader[0].id, "light.constant", 1.0f);
+  shaderSetFloat(shader[0].id, "light.linear", 0.09f);
+  shaderSetFloat(shader[0].id, "light.quadratic", 0.032f);
 
   // set material
   shaderSetFloat(shader[0].id, "material.shininess", 32.0f);
@@ -80,6 +88,18 @@ void render(Mesh mesh[], Camera *camera, Window *window, Shader shader[]) {
 
     glDrawArrays(GL_TRIANGLES, 0, 36);
   }
+
+  /*** light cube ***/
+  useShader(shader[1].id);
+
+  shaderSetMat4(shader[1].id, "view", (float *)view);
+  shaderSetMat4(shader[1].id, "projection", (float *)projection);
+
+  glm_mat4_identity(model);
+  glm_translate(model, lightPos);
+  glm_scale(model, (vec3){0.2f, 0.2f, 0.2f});
+
+  shaderSetMat4(shader[0].id, "model", (float *)model);
 
   // handle fps
   camera->fps = 1 / camera->deltaTime;
