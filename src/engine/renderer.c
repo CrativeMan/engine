@@ -4,11 +4,7 @@
 #include "../header/logger.h"
 #include "../header/renderer.h"
 #include "../header/shader.h"
-#include "GL/gl.h"
-#include "cglm/affine-pre.h"
-#include "cglm/affine.h"
-#include "cglm/mat4.h"
-#include "cglm/types.h"
+
 
 #define ID "Renderer"
 #define X 0
@@ -38,6 +34,7 @@ void render(Mesh mesh[], Camera *camera, Window *window, Shader shader[]) {
   shaderSetVec3(shader[0].id, "light.position", camera->cameraPos);
   shaderSetVec3(shader[0].id, "light.direction", camera->cameraFront);
   shaderSetFloat(shader[0].id, "light.cutoff", cos(glm_rad(12.5f)));
+  shaderSetFloat(shader[0].id, "light.outerCutOff", cos(glm_rad(17.5f)));
   shaderSetVec3(shader[0].id, "viewPos", camera->cameraPos);
 
   // light

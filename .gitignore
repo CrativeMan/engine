@@ -1,6 +1,12 @@
+# folders
 obj/
 .direnv/
 bin/
-main
 logs/
+
+# binarys
+main
+
+# Image files
 out.png
+screenshot.png
