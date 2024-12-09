@@ -5,11 +5,12 @@
 #include "../header/renderer.h"
 #include "../header/shader.h"
 
-
 #define ID "Renderer"
 #define X 0
 #define Y 1
 #define Z 2
+
+#define SHADERL shader[0].id
 
 vec3 lightPos = {1.0f, 1.0f, 2.0f};
 vec3 cubePositions[] = {
@@ -17,6 +18,12 @@ vec3 cubePositions[] = {
     {-3.8f, -2.0f, -12.3f}, {2.4f, -0.4f, -3.5f}, {-1.7f, 3.0f, -7.5f},
     {1.3f, -2.0f, -2.5f},   {1.5f, 2.0f, -2.5f},  {1.5f, 0.2f, -1.5f},
     {-1.3f, 1.0f, -1.5f},
+};
+vec3 pointLightPositions[] = {
+    {0.7f, 0.2f, 2.0f},
+    {2.3f, -3.3f, -4.0f},
+    {-4.0f, 2.0f, -12.0f},
+    {0.0f, 0.0f, -3.0f},
 };
 
 void render(Mesh mesh[], Camera *camera, Window *window, Shader shader[]) {
@@ -30,24 +37,38 @@ void render(Mesh mesh[], Camera *camera, Window *window, Shader shader[]) {
   // color bit for background depth for depth lol
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  glUseProgram(shader[0].id);
-  shaderSetVec3(shader[0].id, "light.position", camera->cameraPos);
-  shaderSetVec3(shader[0].id, "light.direction", camera->cameraFront);
-  shaderSetFloat(shader[0].id, "light.cutoff", cos(glm_rad(12.5f)));
-  shaderSetFloat(shader[0].id, "light.outerCutOff", cos(glm_rad(17.5f)));
-  shaderSetVec3(shader[0].id, "viewPos", camera->cameraPos);
+  glUseProgram(SHADERL);
+  shaderSetVec3(SHADERL, "viewPos", camera->cameraPos);
 
-  // light
-  shaderSetVec3(shader[0].id, "light.ambient", (vec3){0.2f, 0.2f, 0.2f});
-  shaderSetVec3(shader[0].id, "light.diffuse", (vec3){0.5f, 0.5f, 0.5f});
-  shaderSetVec3(shader[0].id, "light.specular", (vec3){1.0f, 1.0f, 1.0f});
+  /*** THE LIGHT MAYHAM ***/
+  // set directional light
+  shaderSetVec3(SHADERL, "dirLight.direction", (vec3){-0.2f, -1.0f, -0.3f});
+  shaderSetVec3(SHADERL, "dirLight.ambient", (vec3){0.2f, 0.2f, 0.2f});
+  shaderSetVec3(SHADERL, "dirLight.diffuse", (vec3){0.5f, 0.5f, 0.5f});
+  shaderSetVec3(SHADERL, "dirLight.specular", (vec3){1.0f, 1.0f, 1.0f});
 
-  shaderSetFloat(shader[0].id, "light.constant", 1.0f);
-  shaderSetFloat(shader[0].id, "light.linear", 0.09f);
-  shaderSetFloat(shader[0].id, "light.quadratic", 0.032f);
+  // set point lights
+  int i;
+  for (i = 0; i < 4; i++) {
+    char buffer[30];
+    snprintf(buffer, sizeof(buffer), "pointLights[%d].position", i);
+    shaderSetVec3(SHADERL, buffer, pointLightPositions[i]);
+    snprintf(buffer, sizeof(buffer), "pointLights[%d].ambient", i);
+    shaderSetVec3(SHADERL, buffer, (vec3){0.2f, 0.2f, 0.2f});
+    snprintf(buffer, sizeof(buffer), "pointLights[%d].diffuse", i);
+    shaderSetVec3(SHADERL, buffer, (vec3){0.5f, 0.5f, 0.5f});
+    snprintf(buffer, sizeof(buffer), "pointLights[%d].specular", i);
+    shaderSetVec3(SHADERL, buffer, (vec3){1.0f, 1.0f, 1.0f});
+    snprintf(buffer, sizeof(buffer), "pointLights[%d].constant", i);
+    shaderSetFloat(SHADERL, buffer, 1.0f);
+    snprintf(buffer, sizeof(buffer), "pointLights[%d].linear", i);
+    shaderSetFloat(SHADERL, buffer, 0.09f);
+    snprintf(buffer, sizeof(buffer), "pointLights[%d].quadratic", i);
+    shaderSetFloat(SHADERL, buffer, 0.032f);
+  }
 
   // set material
-  shaderSetFloat(shader[0].id, "material.shininess", 32.0f);
+  shaderSetFloat(SHADERL, "material.shininess", 32.0f);
 
   // view/projection marix
   mat4 projection;
@@ -58,8 +79,8 @@ void render(Mesh mesh[], Camera *camera, Window *window, Shader shader[]) {
   vec3 center;
   glm_vec3_add(camera->cameraPos, camera->cameraFront, center);
   glm_lookat(camera->cameraPos, center, camera->cameraUp, view);
-  shaderSetMat4(shader[0].id, "view", (float *)view);
-  shaderSetMat4(shader[0].id, "projection", (float *)projection);
+  shaderSetMat4(SHADERL, "view", (float *)view);
+  shaderSetMat4(SHADERL, "projection", (float *)projection);
 
   // direction
   vec3 direction;
@@ -78,29 +99,30 @@ void render(Mesh mesh[], Camera *camera, Window *window, Shader shader[]) {
   // render cube
   mat4 model;
   glBindVertexArray(mesh[0].VAO);
-  for (unsigned int i = 0; i < 10; i++) {
+  for (i = 0; i < 10; i++) {
     glm_mat4_identity(model);
     glm_translate(model, cubePositions[i]);
     float angle = 20.0f * i;
     glm_rotate(model, glm_rad(angle), (vec3){1.0f, 0.3f, 0.5f});
-    shaderSetMat4(shader[0].id, "model", (float *)model);
+    shaderSetMat4(SHADERL, "model", (float *)model);
 
     glDrawArrays(GL_TRIANGLES, 0, 36);
   }
 
   // /*** light cube ***/
-  // useShader(shader[1].id);
+  useShader(shader[1].id);
 
-  // shaderSetMat4(shader[1].id, "projection", (float *)projection);
-  // shaderSetMat4(shader[1].id, "view", (float *)view);
+  shaderSetMat4(shader[1].id, "projection", (float *)projection);
+  shaderSetMat4(shader[1].id, "view", (float *)view);
 
-  // glm_mat4_identity(model);
-  // glm_translate(model, lightPos);
-  // glm_scale(model, (vec3){0.2f, 0.2f, 0.2f});
-  // shaderSetMat4(shader[0].id, "model", (float *)model);
-
-  // glBindVertexArray(mesh[1].VAO);
-  // glDrawArrays(GL_TRIANGLES, 0, 36);
+  for (i = 0; i < 4; i++) {
+    glm_mat4_identity(model);
+    glm_translate(model, pointLightPositions[i]);
+    glm_scale(model, (vec3){0.2f, 0.2f, 0.2f});
+    shaderSetMat4(SHADERL, "model", (float *)model);
+    glBindVertexArray(mesh[1].VAO);
+    glDrawArrays(GL_TRIANGLES, 0, 36);
+  }
 
   // handle fps
   camera->fps = 1 / camera->deltaTime;
