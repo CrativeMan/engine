@@ -25,6 +25,15 @@ void logToFile(const char *message, ...) {
   }
 }
 
+void logNotToFile(const char *id, const char *message, ...) {
+  va_list args;
+  loggerPrintId(id, NULL);
+  va_start(args, message);
+  vprintf(message, args);
+  printf("\n");
+  va_end(args);
+}
+
 void loggerInfo(const char *id, const char *message, ...) {
   va_list args;
   FILE *file = fopen("logs/engine.log", "a");
@@ -88,8 +97,10 @@ void loggerPrintId(const char *id, FILE *file) {
   struct tm *time_info = localtime(&now);
 
   // Print the timestamp and ID
-  fprintf(file, "[%02d:%02d:%02d] [%s]\t", time_info->tm_hour,
-          time_info->tm_min, time_info->tm_sec, id);
+  if (file != NULL) {
+    fprintf(file, "[%02d:%02d:%02d] [%s]\t", time_info->tm_hour,
+            time_info->tm_min, time_info->tm_sec, id);
+  }
   printf("[%02d:%02d:%02d] [%s]\t", time_info->tm_hour, time_info->tm_min,
          time_info->tm_sec, id);
 }

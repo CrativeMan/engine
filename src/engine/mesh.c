@@ -14,7 +14,6 @@ void initMeshes(Mesh self[], float *vertices, int size, int id[]) {
   glBufferData(GL_ARRAY_BUFFER, size, vertices, GL_STATIC_DRAW);
 
   glBindVertexArray(cubeVAO);
-
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)0);
   glEnableVertexAttribArray(0);
   glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
@@ -29,7 +28,6 @@ void initMeshes(Mesh self[], float *vertices, int size, int id[]) {
   glBindVertexArray(lightCubeVAO);
 
   glBindBuffer(GL_ARRAY_BUFFER, VBO);
-
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)0);
   glEnableVertexAttribArray(0);
 
@@ -48,8 +46,9 @@ void initMeshes(Mesh self[], float *vertices, int size, int id[]) {
 
 void deleteMesh(Mesh *mesh) {
   glDeleteVertexArrays(1, &mesh->VAO);
+  loggerInfo(ID, "Deleted VAO '%d'", mesh->VAO);
   glDeleteBuffers(1, &mesh->VBO);
+  loggerInfo(ID, "Deleted VBO '%d'", mesh->VBO);
 
-  loggerInfo(ID, "Deleted Mesh (vC: %d, iC: %d) '%d'", mesh->verticesCount,
-             mesh->indicesCount, mesh->id);
+  loggerInfo(ID, "Deleted Mesh (vC: %d) '%d'", mesh->verticesCount, mesh->id);
 }

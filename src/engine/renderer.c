@@ -12,7 +12,6 @@
 #define Y 1
 #define Z 2
 
-vec3 lightingDirection = {-0.2f, -1.0f, -0.3f};
 vec3 cubePositions[] = {
     {0.0f, 0.0f, 0.0f},     {2.0f, 5.0f, -15.0f}, {-1.5f, -2.2f, -2.5f},
     {-3.8f, -2.0f, -12.3f}, {2.4f, -0.4f, -3.5f}, {-1.7f, 3.0f, -7.5f},
@@ -32,7 +31,7 @@ void render(Mesh mesh[], Camera *camera, Window *window, Shader shader[]) {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   glUseProgram(shader[0].id);
-  shaderSetVec3(shader[0].id, "light.direction", lightingDirection);
+  shaderSetVec3(shader[0].id, "light.direction", (vec3){-0.2f, -1.0f, -0.3f});
   shaderSetVec3(shader[0].id, "viewPos", camera->cameraPos);
 
   // light
@@ -71,6 +70,7 @@ void render(Mesh mesh[], Camera *camera, Window *window, Shader shader[]) {
 
   // render cube
   mat4 model;
+  glBindVertexArray(mesh[0].VAO);
   for (unsigned int i = 0; i < 10; i++) {
     glm_mat4_identity(model);
     glm_translate(model, cubePositions[i]);
@@ -86,7 +86,7 @@ void render(Mesh mesh[], Camera *camera, Window *window, Shader shader[]) {
   static float fpsTimer = 0.0f;
   fpsTimer += camera->deltaTime;
   if (fpsTimer >= 1.0f) {
-    loggerInfo(ID, "FPS: %.2f", camera->fps);
+    logNotToFile(ID, "FPS: %.1f", camera->fps);
     fpsTimer = 0.0f;
   }
 
