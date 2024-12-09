@@ -35,7 +35,9 @@ void render(Mesh mesh[], Camera *camera, Window *window, Shader shader[]) {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   glUseProgram(shader[0].id);
-  shaderSetVec3(shader[0].id, "light.position", lightPos);
+  shaderSetVec3(shader[0].id, "light.position", camera->cameraPos);
+  shaderSetVec3(shader[0].id, "light.direction", camera->cameraFront);
+  shaderSetFloat(shader[0].id, "light.cutoff", cos(glm_rad(12.5f)));
   shaderSetVec3(shader[0].id, "viewPos", camera->cameraPos);
 
   // light
@@ -89,19 +91,19 @@ void render(Mesh mesh[], Camera *camera, Window *window, Shader shader[]) {
     glDrawArrays(GL_TRIANGLES, 0, 36);
   }
 
-  /*** light cube ***/
-  useShader(shader[1].id);
+  // /*** light cube ***/
+  // useShader(shader[1].id);
 
-  shaderSetMat4(shader[1].id, "projection", (float *)projection);
-  shaderSetMat4(shader[1].id, "view", (float *)view);
+  // shaderSetMat4(shader[1].id, "projection", (float *)projection);
+  // shaderSetMat4(shader[1].id, "view", (float *)view);
 
-  glm_mat4_identity(model);
-  glm_translate(model, lightPos);
-  glm_scale(model, (vec3){0.2f, 0.2f, 0.2f});
-  shaderSetMat4(shader[0].id, "model", (float *)model);
+  // glm_mat4_identity(model);
+  // glm_translate(model, lightPos);
+  // glm_scale(model, (vec3){0.2f, 0.2f, 0.2f});
+  // shaderSetMat4(shader[0].id, "model", (float *)model);
 
-  glBindVertexArray(mesh[1].VAO);
-  glDrawArrays(GL_TRIANGLES, 0, 36);
+  // glBindVertexArray(mesh[1].VAO);
+  // glDrawArrays(GL_TRIANGLES, 0, 36);
 
   // handle fps
   camera->fps = 1 / camera->deltaTime;
