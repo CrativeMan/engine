@@ -19,6 +19,7 @@ vec3 cubePositions[] = {
     {1.3f, -2.0f, -2.5f},   {1.5f, 2.0f, -2.5f},  {1.5f, 0.2f, -1.5f},
     {-1.3f, 1.0f, -1.5f},
 };
+#define NUM_POINT_LIGHTS 4
 vec3 pointLightPositions[] = {
     {0.7f, 0.2f, 2.0f},
     {2.3f, -3.3f, -4.0f},
@@ -33,7 +34,7 @@ void render(Mesh mesh[], Camera *camera, Window *window, Shader shader[]) {
   camera->deltaTime = currentFrame - camera->lastFrame;
   camera->lastFrame = currentFrame;
   // draw background
-  glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+  glClearColor(0.01f, 0.01f, 0.01f, 1.0f);
   // color bit for background depth for depth lol
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -49,7 +50,7 @@ void render(Mesh mesh[], Camera *camera, Window *window, Shader shader[]) {
 
   // set point lights
   int i;
-  for (i = 0; i < 4; i++) {
+  for (i = 0; i < NUM_POINT_LIGHTS; i++) {
     char buffer[30];
     snprintf(buffer, sizeof(buffer), "pointLights[%d].position", i);
     shaderSetVec3(SHADERL, buffer, pointLightPositions[i]);
@@ -115,7 +116,7 @@ void render(Mesh mesh[], Camera *camera, Window *window, Shader shader[]) {
   shaderSetMat4(shader[1].id, "projection", (float *)projection);
   shaderSetMat4(shader[1].id, "view", (float *)view);
 
-  for (i = 0; i < 4; i++) {
+  for (i = 0; i < NUM_POINT_LIGHTS; i++) {
     glm_mat4_identity(model);
     glm_translate(model, pointLightPositions[i]);
     glm_scale(model, (vec3){0.2f, 0.2f, 0.2f});
