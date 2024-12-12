@@ -4,6 +4,7 @@
 #include "../header/logger.h"
 #include "../header/renderer.h"
 #include "../header/shader.h"
+#include "cglm/util.h"
 
 #define ID "Renderer"
 #define X 0
@@ -11,6 +12,7 @@
 #define Z 2
 
 #define SHADERL shader[0].id
+#define VEC3(x) ((vec3){(x), (x), (x)})
 
 vec3 lightPos = {1.0f, 1.0f, 2.0f};
 vec3 cubePositions[] = {
@@ -26,6 +28,12 @@ vec3 pointLightPositions[] = {
     {-4.0f, 2.0f, -12.0f},
     {0.0f, 0.0f, -3.0f},
 };
+vec3 pointLightColors[] = {
+    {1.0f, 0.8f, 0.0f},
+    {0.3f, 0.1f, 0.03f},
+    {1.0f, 0.0f, 0.0f},
+    {0.0f, 0.0f, 1.0f},
+};
 
 void render(Mesh mesh[], Camera *camera, Window *window, Shader shader[]) {
   glCheckError();
@@ -34,7 +42,7 @@ void render(Mesh mesh[], Camera *camera, Window *window, Shader shader[]) {
   camera->deltaTime = currentFrame - camera->lastFrame;
   camera->lastFrame = currentFrame;
   // draw background
-  glClearColor(0.01f, 0.01f, 0.01f, 1.0f);
+  glClearColor(0.9f, 0.9f, 0.9f, 1.0f);
   // color bit for background depth for depth lol
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -44,9 +52,9 @@ void render(Mesh mesh[], Camera *camera, Window *window, Shader shader[]) {
   /*** THE LIGHT MAYHAM ***/
   // set directional light
   shaderSetVec3(SHADERL, "dirLight.direction", (vec3){-0.2f, -1.0f, -0.3f});
-  shaderSetVec3(SHADERL, "dirLight.ambient", (vec3){0.2f, 0.2f, 0.2f});
-  shaderSetVec3(SHADERL, "dirLight.diffuse", (vec3){0.5f, 0.5f, 0.5f});
-  shaderSetVec3(SHADERL, "dirLight.specular", (vec3){1.0f, 1.0f, 1.0f});
+  shaderSetVec3(SHADERL, "dirLight.ambient", VEC3(0.2));
+  shaderSetVec3(SHADERL, "dirLight.diffuse", VEC3(0.5));
+  shaderSetVec3(SHADERL, "dirLight.specular", VEC3(1.0));
 
   // set point lights
   int i;
@@ -55,11 +63,11 @@ void render(Mesh mesh[], Camera *camera, Window *window, Shader shader[]) {
     snprintf(buffer, sizeof(buffer), "pointLights[%d].position", i);
     shaderSetVec3(SHADERL, buffer, pointLightPositions[i]);
     snprintf(buffer, sizeof(buffer), "pointLights[%d].ambient", i);
-    shaderSetVec3(SHADERL, buffer, (vec3){0.2f, 0.2f, 0.2f});
+    shaderSetVec3(SHADERL, buffer, (vec3){0.05f, 0.3f, 0.05f});
     snprintf(buffer, sizeof(buffer), "pointLights[%d].diffuse", i);
-    shaderSetVec3(SHADERL, buffer, (vec3){0.5f, 0.5f, 0.5f});
+    shaderSetVec3(SHADERL, buffer, VEC3(0.5));
     snprintf(buffer, sizeof(buffer), "pointLights[%d].specular", i);
-    shaderSetVec3(SHADERL, buffer, (vec3){1.0f, 1.0f, 1.0f});
+    shaderSetVec3(SHADERL, buffer, VEC3(1.0));
     snprintf(buffer, sizeof(buffer), "pointLights[%d].constant", i);
     shaderSetFloat(SHADERL, buffer, 1.0f);
     snprintf(buffer, sizeof(buffer), "pointLights[%d].linear", i);
@@ -106,7 +114,6 @@ void render(Mesh mesh[], Camera *camera, Window *window, Shader shader[]) {
     float angle = 20.0f * i;
     glm_rotate(model, glm_rad(angle), (vec3){1.0f, 0.3f, 0.5f});
     shaderSetMat4(SHADERL, "model", (float *)model);
-
     glDrawArrays(GL_TRIANGLES, 0, 36);
   }
 
@@ -119,8 +126,9 @@ void render(Mesh mesh[], Camera *camera, Window *window, Shader shader[]) {
   for (i = 0; i < NUM_POINT_LIGHTS; i++) {
     glm_mat4_identity(model);
     glm_translate(model, pointLightPositions[i]);
-    glm_scale(model, (vec3){0.2f, 0.2f, 0.2f});
-    shaderSetMat4(SHADERL, "model", (float *)model);
+    glm_scale(model, VEC3(0.2));
+    shaderSetMat4(shader[1].id, "model", (float *)model);
+    shaderSetVec3(shader[1].id, "color", (vec3){0.05f, 0.8f, 0.05f});
     glBindVertexArray(mesh[1].VAO);
     glDrawArrays(GL_TRIANGLES, 0, 36);
   }
