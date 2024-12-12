@@ -31,7 +31,7 @@
           glfw
           glew
           cglm
-
+          assimp
           ];
         };
       }
