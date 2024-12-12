@@ -22,18 +22,21 @@ $(OBJDIR):
 
 $(TARGETMAIN): $(OBJS) | $(TARGETDIR)
 	mkdir -p logs
+	mkdir -p logs/imgs
 	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
 
 clean:
 	rm -f $(OBJS) $(TARGET)
 	rm -rf $(OBJDIR)
 	rm -rf $(TARGETDIR)
+
 tail:
-	echo "" >> logs/engine.log
 	tail -f logs/engine.log
 count:
 	cloc --exclude-list-file=.clocignore .
 run:
 	./bin/main
+cleanforce: clean
+	rm -rf logs
 
 .PHONY: all clean tail count run

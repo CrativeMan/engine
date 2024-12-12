@@ -63,7 +63,7 @@ void mousePosCallback(GLFWwindow *window, double xpos, double ypos) {
 }
 
 void processInput(GLFWwindow *window) {
-  inputCallback(window, &global.camera, &global.debug);
+  inputCallback(window, &global.camera);
 }
 
 /*** Init functions ***/

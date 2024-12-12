@@ -1,5 +1,6 @@
 #include "../header/callbacks.h"
 #include "../header/camera.h"
+#include "../header/image.h"
 #include "GLFW/glfw3.h"
 
 void frame_buffer_size_callback(GLFWwindow *window, int width, int height) {
@@ -39,11 +40,11 @@ void scrollCallback(Camera *camera, float yoffset) {
     camera->fov = 45.0f;
 }
 
-void inputCallback(GLFWwindow *window, Camera *camera, bool *debug) {
+void inputCallback(GLFWwindow *window, Camera *camera) {
   if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
     glfwSetWindowShouldClose(window, GLFW_TRUE);
-  if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS)
-    *debug = true;
+  if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS)
+    saveFrameBufferToPng(window);
 
   cameraMove(window, camera);
 }

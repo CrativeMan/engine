@@ -22,7 +22,6 @@ typedef struct {
   Camera camera;
   Mesh mesh[2];
   long int counter;
-  bool debug;
 } Global;
 
 #endif // MAIN_H

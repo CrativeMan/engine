@@ -1,10 +1,13 @@
 #include <GL/glew.h>
-#include <GLFW/glfw3.h>
+#include <stdlib.h>
+#include <time.h>
 
 #include "../header/image.h"
 #include "../header/logger.h"
 #define STB_IMAGE_IMPLEMENTATION
 #include "../header/stb_img.h"
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "../header/stb_image_write.h"
 
 Texture loadTexture(char const *path) {
   Texture texture;
@@ -40,4 +43,56 @@ Texture loadTexture(char const *path) {
   }
 
   return texture;
+}
+
+void saveFrameBufferToPng(GLFWwindow *window) {
+  int width, height;
+  glfwGetFramebufferSize(window, &width, &height);
+
+  unsigned char *pixels = malloc(width * height * 3);
+  if (!pixels) {
+    loggerError("Image", "Failed to malloc mem for screenshot");
+    return;
+  }
+
+  glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, pixels);
+
+  time_t now;
+  struct tm* timeinfo;
+  char filename[256];
+
+  time(&now);
+  timeinfo = localtime(&now);
+
+  strftime(filename, sizeof(filename), "logs/imgs/screenshot_%Y%m%d_%H%M%S.png", timeinfo);
+
+  unsigned char *flipped_pixels = malloc(width * height * 3);
+  if (!flipped_pixels) {
+    loggerError("Image", "Failed to malloc mem for flipped_pixels");
+    free(pixels);
+    return;
+  }
+
+  int i;
+  for (i = 0; i < height; i++) {
+    memcpy(flipped_pixels + (i * width * 3), pixels+((height - i - 1) * width * 3), width * 3);
+  }
+
+  int result = stbi_write_png(
+    filename,
+    width,
+    height,
+    3,
+    flipped_pixels,
+    width * 3
+  );
+
+  free(pixels);
+  free(flipped_pixels);
+
+  if (result) {
+    loggerInfo("Image", "Screenshot saved as %s\n", filename);
+  } else {
+    loggerError("Image", "Failed to save screenshot");
+  }
 }
