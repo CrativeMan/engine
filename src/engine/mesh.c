@@ -1,54 +1,73 @@
 #include <GL/glew.h>
+#include <string.h>
 
-#include "../header/logger.h"
 #include "../header/mesh.h"
+#include "../header/utils.h"
+#include "../header/logger.h"
+#include "GL/gl.h"
+#include "GL/glext.h"
 
 #define ID "Mesh"
 
-void initMeshes(Mesh self[], float *vertices, int size, int id[]) {
-  unsigned int VBO, cubeVAO;
-  glGenVertexArrays(1, &cubeVAO);
-  glGenBuffers(1, &VBO);
+int initMesh(Mesh *self, Vertex *vertices, size_t vertices_size, unsigned int *indices, size_t indices_size, Texture *textures, size_t textures_size) {
+  self->vertices = vertices;
+  self->vertices_size = vertices_size;
+  self->vertices_count = vertices_size / sizeof(Vertex);
+  self->indices = indices;
+  self->indices_size = indices_size;
+  self->indices_count = indices_size / sizeof(unsigned int);
+  self->textures = textures;
+  self->textures_size = textures_size;
+  self->textures_count = textures_size / sizeof(Texture);
 
-  glBindBuffer(GL_ARRAY_BUFFER, VBO);
-  glBufferData(GL_ARRAY_BUFFER, size, vertices, GL_STATIC_DRAW);
+  int res = setupMesh(self);
+  ASSERT(res, "failed to setup mesh\n");
 
-  glBindVertexArray(cubeVAO);
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)0);
-  glEnableVertexAttribArray(0);
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
-                        (void *)(3 * sizeof(float)));
-  glEnableVertexAttribArray(1);
-  glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
-                        (void *)(6 * sizeof(float)));
-  glEnableVertexAttribArray(2);
-
-  unsigned int lightCubeVAO;
-  glGenVertexArrays(1, &lightCubeVAO);
-  glBindVertexArray(lightCubeVAO);
-
-  glBindBuffer(GL_ARRAY_BUFFER, VBO);
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)0);
-  glEnableVertexAttribArray(0);
-
-  self[0].VAO = cubeVAO;
-  self[0].VBO = VBO;
-  self[0].verticesSize = size;
-  self[0].verticesCount = size / sizeof(float);
-  self[0].id = id[0];
-
-  self[1].VAO = lightCubeVAO;
-  self[1].VBO = VBO;
-  self[1].verticesSize = size;
-  self[1].verticesCount = size / sizeof(float);
-  self[1].id = id[1];
+  return 0;
 }
 
-void deleteMesh(Mesh *mesh) {
-  glDeleteVertexArrays(1, &mesh->VAO);
-  loggerInfo(ID, "Deleted VAO '%d'", mesh->VAO);
-  glDeleteBuffers(1, &mesh->VBO);
-  loggerInfo(ID, "Deleted VBO '%d'", mesh->VBO);
+int setupMesh(Mesh *self) {
+  glGenVertexArrays(1, &self->VAO);
+  glGenBuffers(1, &self->VBO);
+  glGenBuffers(1, &self->EBO);
 
-  loggerInfo(ID, "Deleted Mesh (vC: %d) '%d'", mesh->verticesCount, mesh->id);
+  glBindVertexArray(self->VAO);
+  glBindBuffer(GL_ARRAY_BUFFER, self->VBO);
+
+  glBufferData(GL_ARRAY_BUFFER, self->vertices_count * sizeof(Vertex), &self->vertices[0], GL_STATIC_DRAW);
+
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, self->EBO);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, self->indices_count * sizeof(unsigned int), &self->indices[0], GL_STATIC_DRAW);
+
+  glEnableVertexAttribArray(0);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)0);
+
+  glEnableVertexAttribArray(1);
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, Normal));
+
+  glEnableVertexAttribArray(2);
+  glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, TexCoords));
+
+  glBindVertexArray(0);
+
+  int res = glCheckError();
+  return res;
+}
+
+int drawMesh(Mesh *self, Shader *shader) {
+  unsigned int diffuseNr = 1;
+  unsigned int specularNr = 1;
+  for (unsigned int i = 0; i < self->textures_count; i++) {
+    glActiveTexture(GL_TEXTURE0 + i);
+
+    int number;
+    char *name = self->textures[i].type;
+    if (strcmp(name, "texture_diffuse") == 0)
+      number = diffuseNr++;
+    else if (strcmp(name, "texture_specular") == 0)
+      number = specularNr++;
+
+    shaderSetFloat(shader->id, strcat(strcat("material.", name), ), i);
+
+  }
 }

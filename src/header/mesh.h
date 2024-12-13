@@ -1,25 +1,39 @@
 #ifndef MESH_H
 #define MESH_H
 
-#include "image.h"
+#include "shader.h"
+#include <cglm/vec2.h>
+#include <cglm/vec3.h>
 #include <stdlib.h>
 
 typedef struct {
-  int id;           // id of mesh
-  unsigned int VAO; // VertexArrayObject
-  unsigned int VBO; // VertexBufferObject
-  unsigned int EBO; // ElementBuffer Object
-  Texture texture[2];
-  unsigned int verticesCount; // num of vertices
-  unsigned int verticesSize;  // size of vertices
-  unsigned int indicesCount;  // num of indices
-  unsigned int indicesSize;   // size of indices
-  int textureCount;
+  vec3 Position;
+  vec3 Normal;
+  vec2 TexCoords;
+} Vertex;
+
+typedef struct {
+  unsigned int id;
+  char *type;
+} Texture;
+
+typedef struct {
+  Vertex *vertices;
+  unsigned int vertices_size;
+  unsigned int vertices_count;
+  unsigned int *indices;
+  unsigned int indices_size;
+  unsigned int indices_count;
+  Texture *textures;
+  unsigned int textures_size;
+  unsigned int textures_count;
+  unsigned int VAO, VBO, EBO;
 } Mesh;
 
-#define MESH_NULL {0, 0, 0, 0, 0, 0};
-
-void initMeshes(Mesh mesh[], float *vertices, int size, int id[]);
-void deleteMesh(Mesh *mesh);
+int initMesh(Mesh *self, Vertex *vertices, size_t vertices_size,
+             unsigned int *indices, size_t indices_size, Texture *textures,
+             size_t textures_size);
+int drawMesh(Mesh *self, Shader *shader);
+int setupMesh(Mesh *self);
 
 #endif // MESH_H
