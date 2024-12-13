@@ -68,10 +68,6 @@ void mousePosCallback(GLFWwindow *window, double xpos, double ypos) {
   mouseCallback(&global.camera, xpos, ypos, &firstMouse);
 }
 
-void processInput(GLFWwindow *window) {
-  inputCallback(window, &global.camera);
-}
-
 /*** Init functions ***/
 void init() {
   global.counter = 0;
@@ -150,7 +146,7 @@ int main() {
   // main loop
   while (!glfwWindowShouldClose(global.window.id)) {
     glCheckError();
-    processInput(global.window.id);
+    inputCallback(global.window.id, &global.camera);
     render(global.mesh, &global.camera, &global.window, global.shader);
     glfwSwapBuffers(global.window.id);
     glfwPollEvents();

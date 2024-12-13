@@ -9,6 +9,8 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "../header/stb_image_write.h"
 
+#define ID "Image"
+
 Texture loadTexture(char const *path) {
   Texture texture;
   glGenTextures(1, &texture.id);
@@ -36,9 +38,9 @@ Texture loadTexture(char const *path) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     stbi_image_free(data);
-    loggerInfo("Image", "Loaded image from '%s'", path);
+    loggerInfo(ID, "Loaded image from '%s'", path);
   } else {
-    loggerError("Image", "Failed to load image from '%s'", path);
+    loggerError(ID, "Failed to load image from '%s'", path);
     stbi_image_free(data);
   }
 
@@ -51,7 +53,7 @@ void saveFrameBufferToPng(GLFWwindow *window) {
 
   unsigned char *pixels = malloc(width * height * 3);
   if (!pixels) {
-    loggerError("Image", "Failed to malloc mem for screenshot");
+    loggerError(ID, "Failed to malloc mem for screenshot");
     return;
   }
 
@@ -68,7 +70,7 @@ void saveFrameBufferToPng(GLFWwindow *window) {
 
   unsigned char *flipped_pixels = malloc(width * height * 3);
   if (!flipped_pixels) {
-    loggerError("Image", "Failed to malloc mem for flipped_pixels");
+    loggerError(ID, "Failed to malloc mem for flipped_pixels");
     free(pixels);
     return;
   }
@@ -91,8 +93,8 @@ void saveFrameBufferToPng(GLFWwindow *window) {
   free(flipped_pixels);
 
   if (result) {
-    loggerInfo("Image", "Screenshot saved as %s\n", filename);
+    loggerInfo(ID, "Screenshot saved as %s\n", filename);
   } else {
-    loggerError("Image", "Failed to save screenshot");
+    loggerError(ID, "Failed to save screenshot");
   }
 }
