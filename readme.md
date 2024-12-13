@@ -1,6 +1,6 @@
 # engine
 
-A simple rendering engine/game engine written in c following the tutorial of the incredible book [learnopengl](https://www.opengl-tutorial.org).
+A simple rendering engine/game engine written in c following the tutorial of the incredible book [learnopengl](https://learnopengl.com/).
 It is simply for learning purposes and to understand 3d rendering and the c language better.
 
 It is build using:
