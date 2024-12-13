@@ -34,6 +34,15 @@ void logNotToFile(const char *id, const char *message, ...) {
   va_end(args);
 }
 
+void loggerDev(const char *message, ...) {
+  va_list args;
+  loggerPrintId("DEV", NULL);
+  va_start(args, message);
+  vprintf(message, args);
+  printf("\n");
+  va_end(args);
+}
+
 void loggerInfo(const char *id, const char *message, ...) {
   va_list args;
   FILE *file = fopen("logs/engine.log", "a");

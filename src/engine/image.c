@@ -1,4 +1,5 @@
 #include <GL/glew.h>
+#include <assert.h>
 #include <stdlib.h>
 #include <time.h>
 
@@ -93,7 +94,7 @@ void saveFrameBufferToPng(GLFWwindow *window) {
   free(flipped_pixels);
 
   if (result) {
-    loggerInfo(ID, "Screenshot saved as %s\n", filename);
+    loggerInfo(ID, "Screenshot saved as %s", filename);
   } else {
     loggerError(ID, "Failed to save screenshot");
   }

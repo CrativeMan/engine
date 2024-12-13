@@ -5,6 +5,7 @@
 
 void logToFile(const char *message, ...);
 void logNotToFile(const char *id, const char *message, ...);
+void loggerDev(const char *message, ...);
 void loggerInfo(const char *id, const char *message, ...);
 void loggerWarn(const char *id, const char *message, ...);
 void loggerError(const char *id, const char *message, ...);

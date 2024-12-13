@@ -28,12 +28,6 @@ vec3 pointLightPositions[] = {
     {-4.0f, 2.0f, -12.0f},
     {0.0f, 0.0f, -3.0f},
 };
-vec3 pointLightColors[] = {
-    {1.0f, 0.8f, 0.0f},
-    {0.3f, 0.1f, 0.03f},
-    {1.0f, 0.0f, 0.0f},
-    {0.0f, 0.0f, 1.0f},
-};
 
 void render(Mesh mesh[], Camera *camera, Window *window, Shader shader[]) {
   glCheckError();
@@ -42,7 +36,7 @@ void render(Mesh mesh[], Camera *camera, Window *window, Shader shader[]) {
   camera->deltaTime = currentFrame - camera->lastFrame;
   camera->lastFrame = currentFrame;
   // draw background
-  glClearColor(0.9f, 0.9f, 0.9f, 1.0f);
+  glClearColor(0.01f, 0.01f, 0.01f, 1.0f);
   // color bit for background depth for depth lol
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -63,7 +57,7 @@ void render(Mesh mesh[], Camera *camera, Window *window, Shader shader[]) {
     snprintf(buffer, sizeof(buffer), "pointLights[%d].position", i);
     shaderSetVec3(SHADERL, buffer, pointLightPositions[i]);
     snprintf(buffer, sizeof(buffer), "pointLights[%d].ambient", i);
-    shaderSetVec3(SHADERL, buffer, (vec3){0.05f, 0.3f, 0.05f});
+    shaderSetVec3(SHADERL, buffer, VEC3(0.9f));
     snprintf(buffer, sizeof(buffer), "pointLights[%d].diffuse", i);
     shaderSetVec3(SHADERL, buffer, VEC3(0.5));
     snprintf(buffer, sizeof(buffer), "pointLights[%d].specular", i);
@@ -128,7 +122,7 @@ void render(Mesh mesh[], Camera *camera, Window *window, Shader shader[]) {
     glm_translate(model, pointLightPositions[i]);
     glm_scale(model, VEC3(0.2));
     shaderSetMat4(shader[1].id, "model", (float *)model);
-    shaderSetVec3(shader[1].id, "color", (vec3){0.05f, 0.8f, 0.05f});
+    shaderSetVec3(shader[1].id, "color", VEC3(0.9f));
     glBindVertexArray(mesh[1].VAO);
     glDrawArrays(GL_TRIANGLES, 0, 36);
   }
