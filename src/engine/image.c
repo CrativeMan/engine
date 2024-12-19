@@ -12,23 +12,23 @@
 
 #define ID "Image"
 
-Texture loadTexture(char const *path) {
-  Texture texture;
-  glGenTextures(1, &texture.id);
+Image loadImage(char const *path){
+  Image img;
+  glGenTextures(1, &img.id);
 
-  unsigned char *data = stbi_load(path, &texture.width, &texture.height,
-                                  &texture.nrComponents, 0);
+  unsigned char *data = stbi_load(path, &img.width, &img.height,
+                                  &img.nrComponents, 0);
   if (data) {
     GLenum format = GL_RGBA;
-    if (texture.nrComponents == 1)
+    if (img.nrComponents == 1)
       format = GL_RED;
-    else if (texture.nrComponents == 3)
+    else if (img.nrComponents == 3)
       format = GL_RGB;
-    else if (texture.nrComponents == 4)
+    else if (img.nrComponents == 4)
       format = GL_RGBA;
 
-    glBindTexture(GL_TEXTURE_2D, texture.id);
-    glTexImage2D(GL_TEXTURE_2D, 0, format, texture.width, texture.height, 0,
+    glBindTexture(GL_TEXTURE_2D, img.id);
+    glTexImage2D(GL_TEXTURE_2D, 0, format, img.width, img.height, 0,
                  format, GL_UNSIGNED_BYTE, data);
     glGenerateMipmap(GL_TEXTURE_2D);
 
@@ -45,7 +45,7 @@ Texture loadTexture(char const *path) {
     stbi_image_free(data);
   }
 
-  return texture;
+  return img;
 }
 
 void saveFrameBufferToPng(GLFWwindow *window) {

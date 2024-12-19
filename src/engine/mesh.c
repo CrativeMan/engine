@@ -1,4 +1,5 @@
 #include <GL/glew.h>
+#include <stdio.h>
 #include <string.h>
 
 #include "../header/mesh.h"
@@ -50,8 +51,8 @@ int setupMesh(Mesh *self) {
 
   glBindVertexArray(0);
 
-  int res = glCheckError();
-  return res;
+  int err = glCheckError();
+  return err;
 }
 
 int drawMesh(Mesh *self, Shader *shader) {
@@ -60,14 +61,28 @@ int drawMesh(Mesh *self, Shader *shader) {
   for (unsigned int i = 0; i < self->textures_count; i++) {
     glActiveTexture(GL_TEXTURE0 + i);
 
-    int number;
+    char numberStr[16];
+    char uniformName[64];
     char *name = self->textures[i].type;
-    if (strcmp(name, "texture_diffuse") == 0)
-      number = diffuseNr++;
-    else if (strcmp(name, "texture_specular") == 0)
-      number = specularNr++;
-
-    shaderSetFloat(shader->id, strcat(strcat("material.", name), ), i);
-
+    if (strcmp(name, "texture_diffuse") == 0) {
+      snprintf(numberStr, sizeof(numberStr), "%u", diffuseNr);
+      diffuseNr++;
+    }
+    else if (strcmp(name, "texture_specular") == 0) {
+      snprintf(numberStr, sizeof(numberStr), "%u", specularNr);
+      specularNr++;
+    }
+    snprintf(uniformName, sizeof(uniformName), "material.%s%s", self->textures[i].type, numberStr);
+    shaderSetFloat(shader->id, uniformName, (float)i);
+    glBindTexture(GL_TEXTURE_2D, self->textures[i].id);
   }
+
+  glActiveTexture(GL_TEXTURE0);
+
+  glBindVertexArray(self->VAO);
+  glDrawElements(GL_TRIANGLES, self->indices_count, GL_UNSIGNED_INT, 0);
+  glBindVertexArray(0);
+
+  int err = glGetError();
+  return err;
 }

@@ -3,7 +3,13 @@
 
 #include <GLFW/glfw3.h>
 
-Texture loadTexture(char const *path);
+typedef struct {
+  unsigned int id;
+  int width, height;
+  int nrComponents;
+} Image;
+
+Image loadImage(char const *path);
 void saveFrameBufferToPng(GLFWwindow *window);
 
 #endif // IMAGE_H
