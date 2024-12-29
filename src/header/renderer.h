@@ -3,7 +3,8 @@
 
 #include "camera.h"
 #include "main.h"
+#include "model.h"
 #include "shader.h"
 
-void render(Mesh mesh[], Camera *camera, Window *window, Shader shader[]);
+void render(Model *model, Camera *camera, Window *window, Shader shader[]);
 #endif // RENDERER_H

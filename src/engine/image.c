@@ -5,6 +5,7 @@
 
 #include "../header/image.h"
 #include "../header/logger.h"
+#include "GL/gl.h"
 #define STB_IMAGE_IMPLEMENTATION
 #include "../header/stb_img.h"
 #define STB_IMAGE_WRITE_IMPLEMENTATION
@@ -12,14 +13,19 @@
 
 #define ID "Image"
 
-Image loadImage(char const *path){
+Image loadImage(char const *path, char *directory) {
   Image img;
+  char filename[256]; // Make sure this is large enough for your paths
+  snprintf(filename, sizeof(filename), "%s/%s", directory, path);
+
   glGenTextures(1, &img.id);
 
-  unsigned char *data = stbi_load(path, &img.width, &img.height,
-                                  &img.nrComponents, 0);
+  stbi_set_flip_vertically_on_load(0);
+  unsigned char *data =
+      stbi_load(filename, &img.width, &img.height, &img.nrComponents, 0);
+
   if (data) {
-    GLenum format = GL_RGBA;
+    GLenum format = GL_NONE;
     if (img.nrComponents == 1)
       format = GL_RED;
     else if (img.nrComponents == 3)
@@ -28,8 +34,8 @@ Image loadImage(char const *path){
       format = GL_RGBA;
 
     glBindTexture(GL_TEXTURE_2D, img.id);
-    glTexImage2D(GL_TEXTURE_2D, 0, format, img.width, img.height, 0,
-                 format, GL_UNSIGNED_BYTE, data);
+    glTexImage2D(GL_TEXTURE_2D, 0, format, img.width, img.height, 0, format,
+                 GL_UNSIGNED_BYTE, data);
     glGenerateMipmap(GL_TEXTURE_2D);
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -39,12 +45,12 @@ Image loadImage(char const *path){
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     stbi_image_free(data);
-    loggerInfo(ID, "Loaded image from '%s'", path);
   } else {
-    loggerError(ID, "Failed to load image from '%s'", path);
+    loggerError(ID, "Texure failed to load at path '%s'", filename);
     stbi_image_free(data);
   }
 
+  loggerInfo(ID, "Texture loaded from path '%s'", filename);
   return img;
 }
 
@@ -61,13 +67,14 @@ void saveFrameBufferToPng(GLFWwindow *window) {
   glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, pixels);
 
   time_t now;
-  struct tm* timeinfo;
+  struct tm *timeinfo;
   char filename[256];
 
   time(&now);
   timeinfo = localtime(&now);
 
-  strftime(filename, sizeof(filename), "logs/imgs/screenshot_%Y%m%d_%H%M%S.png", timeinfo);
+  strftime(filename, sizeof(filename), "logs/imgs/screenshot_%Y%m%d_%H%M%S.png",
+           timeinfo);
 
   unsigned char *flipped_pixels = malloc(width * height * 3);
   if (!flipped_pixels) {
@@ -78,17 +85,12 @@ void saveFrameBufferToPng(GLFWwindow *window) {
 
   int i;
   for (i = 0; i < height; i++) {
-    memcpy(flipped_pixels + (i * width * 3), pixels+((height - i - 1) * width * 3), width * 3);
+    memcpy(flipped_pixels + (i * width * 3),
+           pixels + ((height - i - 1) * width * 3), width * 3);
   }
 
-  int result = stbi_write_png(
-    filename,
-    width,
-    height,
-    3,
-    flipped_pixels,
-    width * 3
-  );
+  int result =
+      stbi_write_png(filename, width, height, 3, flipped_pixels, width * 3);
 
   free(pixels);
   free(flipped_pixels);

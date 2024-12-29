@@ -1,6 +1,6 @@
 CC = gcc
 CFLAGS = -Wall -Wextra -pedantic -std=c99
-LDFLAGS = -lGL -lglfw -lGLEW -lcglm -lm
+LDFLAGS = -lGL -lglfw -lGLEW -lcglm -lm -lassimp
 TESTLDFLAGS = -lcglm -lm
 SRCDIR = src/engine
 TESTDIR = src/test
@@ -13,7 +13,7 @@ TARGETTEST = $(TARGETDIR)/test
 
 all: $(TARGETMAIN)
 
-test: 
+test:
 	$(CC) src/test/test.c -o $(TARGETTEST)
 
 $(OBJDIR)/%.o: $(SRCDIR)/%.c | $(OBJDIR)

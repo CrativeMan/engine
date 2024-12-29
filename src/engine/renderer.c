@@ -12,7 +12,7 @@
 
 #define VEC3(x) ((vec3){(x), (x), (x)})
 
-void render(Mesh mesh[], Camera *camera, Window *window, Shader shader[]) {
+void render(Model *model, Camera *camera, Window *window, Shader shader[]) {
   glCheckError();
   // setup delta time
   float currentFrame = glfwGetTime();
@@ -31,6 +31,8 @@ void render(Mesh mesh[], Camera *camera, Window *window, Shader shader[]) {
     logNotToFile(ID, "FPS: %.1f", camera->fps);
     fpsTimer = 0.0f;
   }
+
+  drawModel(model, &shader[0]);
 
   // set title
   snprintf(window->title, sizeof(window->title),

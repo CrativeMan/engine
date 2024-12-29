@@ -3,17 +3,28 @@
 
 #include "mesh.h"
 
+#include <assimp/cimport.h>
+#include <assimp/postprocess.h>
+#include <assimp/scene.h>
+
 typedef struct {
   Mesh *meshes;
-  unsigned int meshes_size;
-  unsigned int meshes_count;
-  char *directory;
+  Texture *textures_loaded;
+  unsigned int *textureIds;
+  unsigned int numMeshes;
+  unsigned int numTexturesLoaded;
+  unsigned int numTextureIds;
+  char directory[256];
 } Model;
 
-Model loadModel(char *path);
+Model *loadModel(char *path);
+void destroyModel(Model *model);
 void drawModel(Model *model, Shader *shader);
-processNode();
-processMesh();
-Texture *loadMaterialTextures();
+Mesh processMesh(const struct aiMesh *mesh, const struct aiScene *scene,
+                 Model *model);
+void processNode(const struct aiNode *node, const struct aiScene *scene,
+                 Model *model);
+void loadMaterialTextures(struct aiMaterial *mat, enum aiTextureType type,
+                          const char *typeName, Model *model, Mesh *mesh);
 
 #endif // MODEL_H

@@ -9,7 +9,7 @@ typedef struct {
   int nrComponents;
 } Image;
 
-Image loadImage(char const *path);
+Image loadImage(char const *path, char directory[]);
 void saveFrameBufferToPng(GLFWwindow *window);
 
 #endif // IMAGE_H

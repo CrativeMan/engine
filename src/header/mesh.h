@@ -7,33 +7,38 @@
 #include <stdlib.h>
 
 typedef struct {
-  vec3 Position;
-  vec3 Normal;
-  vec2 TexCoords;
+  float x, y, z;
+} Vec3;
+
+typedef struct {
+  float x, y;
+} Vec2;
+
+typedef struct {
+  Vec3 Position;
+  Vec3 Normal;
+  Vec2 TexCoords;
 } Vertex;
 
 typedef struct {
   unsigned int id;
-  char *type;
+  char type[32];
+  char path[256];
 } Texture;
 
 typedef struct {
   Vertex *vertices;
-  unsigned int vertices_size;
-  unsigned int vertices_count;
   unsigned int *indices;
-  unsigned int indices_size;
-  unsigned int indices_count;
   Texture *textures;
-  unsigned int textures_size;
-  unsigned int textures_count;
-  unsigned int VAO, VBO, EBO;
+  unsigned int numVertices;
+  unsigned int numIndices;
+  unsigned int numTextures;
+  unsigned int VAO;
+  unsigned int VBO;
+  unsigned int EBO;
 } Mesh;
 
-int initMesh(Mesh *self, Vertex *vertices, size_t vertices_size,
-             unsigned int *indices, size_t indices_size, Texture *textures,
-             size_t textures_size);
-int drawMesh(Mesh *self, Shader *shader);
 int setupMesh(Mesh *self);
+int drawMesh(Mesh *self, Shader *shader);
 
 #endif // MESH_H
