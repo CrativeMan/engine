@@ -38,12 +38,13 @@ Model *loadModel(char *path) {
 
   aiReleaseImport(scene);
 
+  loggerInfo("Model", "Finished loading model from '%s'", path);
   return model;
 }
 
 void processNode(const struct aiNode *node, const struct aiScene *scene,
                  Model *model) {
-  loggerInfo("Model", "Starting to process node '%s'", node->mName);
+  loggerDev("Starting to process node '%s'", node->mName);
   unsigned int i;
   for (i = 0; i < node->mNumMeshes; i++) {
     struct aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
@@ -55,10 +56,12 @@ void processNode(const struct aiNode *node, const struct aiScene *scene,
   for (i = 0; i < node->mNumChildren; i++) {
     processNode(node->mChildren[i], scene, model);
   }
+  loggerDev("Finished to process node '%s'", node->mName);
 }
 
 Mesh processMesh(const struct aiMesh *mesh, const struct aiScene *scene,
                  Model *model) {
+  loggerDev("Processing mesh '%s'", mesh->mName);
   Mesh result = {0};
 
   result.vertices = malloc(mesh->mNumVertices * sizeof(Vertex));
@@ -108,10 +111,12 @@ Mesh processMesh(const struct aiMesh *mesh, const struct aiScene *scene,
   if (mesh->mMaterialIndex != -1) {
     struct aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
 
+    loggerDev("Loading diffuse texture for mesh '%s'", mesh->mName);
     // load diffuse textures
     loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse",
                          model, &result);
 
+    loggerDev("Loading specular texture for mesh '%s'", mesh->mName);
     // Load specular textures
     loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular",
                          model, &result);
@@ -119,6 +124,7 @@ Mesh processMesh(const struct aiMesh *mesh, const struct aiScene *scene,
 
   setupMesh(&result);
 
+  loggerDev("Finished processing mesh '%s'", mesh->mName);
   return result;
 }
 
@@ -126,6 +132,7 @@ void loadMaterialTextures(struct aiMaterial *mat, enum aiTextureType type,
                           const char *typeName, Model *model, Mesh *mesh) {
   unsigned int textureCount = aiGetMaterialTextureCount(mat, type);
 
+  loggerDev("Tst %s", typeName);
   for (unsigned int i = 0; i < textureCount; i++) {
     struct aiString str;
     aiGetMaterialTexture(mat, type, i, &str, NULL, NULL, NULL, NULL, NULL,
