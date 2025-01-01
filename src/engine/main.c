@@ -101,7 +101,7 @@ int main() {
   while (!glfwWindowShouldClose(global.window.id)) {
     glCheckError();
     inputCallback(global.window.id, &global.camera);
-    render(model, &global.camera, &global.window, global.shader);
+    render(&global.camera, &global.window, global.shader);
     glfwSwapBuffers(global.window.id);
     glfwPollEvents();
   }

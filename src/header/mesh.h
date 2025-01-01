@@ -9,15 +9,17 @@
 typedef struct {
   float x, y, z;
 } Vec3;
+#define VEC3(x) ((Vec3){(x), (x), (x)})
 
 typedef struct {
   float x, y;
 } Vec2;
+#define VEC2(x) ((Vec2){(x), (x)})
 
 typedef struct {
-  Vec3 Position;
-  Vec3 Normal;
-  Vec2 TexCoords;
+  Vec3 position;
+  Vec3 normal;
+  Vec2 texCoords;
 } Vertex;
 
 typedef struct {

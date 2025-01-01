@@ -6,5 +6,5 @@
 #include "model.h"
 #include "shader.h"
 
-void render(Model *model, Camera *camera, Window *window, Shader shader[]);
+void render(Camera *camera, Window *window, Shader shader[]);
 #endif // RENDERER_H

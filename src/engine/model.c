@@ -44,7 +44,7 @@ Model *loadModel(char *path) {
 
 void processNode(const struct aiNode *node, const struct aiScene *scene,
                  Model *model) {
-  loggerDev("Starting to process node '%s'", node->mName);
+  loggerDev("%sStarting to process node '%s'", RED, node->mName.data);
   unsigned int i;
   for (i = 0; i < node->mNumMeshes; i++) {
     struct aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
@@ -56,12 +56,13 @@ void processNode(const struct aiNode *node, const struct aiScene *scene,
   for (i = 0; i < node->mNumChildren; i++) {
     processNode(node->mChildren[i], scene, model);
   }
-  loggerDev("Finished to process node '%s'", node->mName);
+  loggerDev("%sFinished to process node '%s'%s", GREEN, node->mName.data,
+            RESET);
 }
 
 Mesh processMesh(const struct aiMesh *mesh, const struct aiScene *scene,
                  Model *model) {
-  loggerDev("Processing mesh '%s'", mesh->mName);
+  loggerDev("%sProcessing mesh '%s'", YELLOW, mesh->mName.data);
   Mesh result = {0};
 
   result.vertices = malloc(mesh->mNumVertices * sizeof(Vertex));
@@ -72,19 +73,19 @@ Mesh processMesh(const struct aiMesh *mesh, const struct aiScene *scene,
   for (i = 0; i < mesh->mNumVertices; i++) {
     Vertex vertex = {0};
 
-    vertex.Position.x = mesh->mVertices[i].x;
-    vertex.Position.y = mesh->mVertices[i].y;
-    vertex.Position.z = mesh->mVertices[i].z;
+    vertex.position.x = mesh->mVertices[i].x;
+    vertex.position.y = mesh->mVertices[i].y;
+    vertex.position.z = mesh->mVertices[i].z;
 
     if (mesh->mNormals) {
-      vertex.Normal.x = mesh->mNormals[i].x;
-      vertex.Normal.y = mesh->mNormals[i].y;
-      vertex.Normal.z = mesh->mNormals[i].z;
+      vertex.normal.x = mesh->mNormals[i].x;
+      vertex.normal.y = mesh->mNormals[i].y;
+      vertex.normal.z = mesh->mNormals[i].z;
     }
 
     if (mesh->mTextureCoords[0]) {
-      vertex.TexCoords.x = mesh->mTextureCoords[0][i].x;
-      vertex.TexCoords.y = mesh->mTextureCoords[0][i].y;
+      vertex.texCoords.x = mesh->mTextureCoords[0][i].x;
+      vertex.texCoords.y = mesh->mTextureCoords[0][i].y;
     }
 
     result.vertices[i] = vertex;
@@ -111,12 +112,12 @@ Mesh processMesh(const struct aiMesh *mesh, const struct aiScene *scene,
   if (mesh->mMaterialIndex != -1) {
     struct aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
 
-    loggerDev("Loading diffuse texture for mesh '%s'", mesh->mName);
+    loggerDev("Loading diffuse texture for mesh '%s'", mesh->mName.data);
     // load diffuse textures
     loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse",
                          model, &result);
 
-    loggerDev("Loading specular texture for mesh '%s'", mesh->mName);
+    loggerDev("Loading specular texture for mesh '%s'", mesh->mName.data);
     // Load specular textures
     loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular",
                          model, &result);
@@ -124,15 +125,16 @@ Mesh processMesh(const struct aiMesh *mesh, const struct aiScene *scene,
 
   setupMesh(&result);
 
-  loggerDev("Finished processing mesh '%s'", mesh->mName);
+  loggerDev("%sFinished processing mesh '%s'%s", GREEN, mesh->mName.data,
+            RESET);
   return result;
 }
 
 void loadMaterialTextures(struct aiMaterial *mat, enum aiTextureType type,
                           const char *typeName, Model *model, Mesh *mesh) {
   unsigned int textureCount = aiGetMaterialTextureCount(mat, type);
+  loggerDev("NUM TEXTURES '%d'", model->numTexturesLoaded);
 
-  loggerDev("Tst %s", typeName);
   for (unsigned int i = 0; i < textureCount; i++) {
     struct aiString str;
     aiGetMaterialTexture(mat, type, i, &str, NULL, NULL, NULL, NULL, NULL,
@@ -179,6 +181,7 @@ void loadMaterialTextures(struct aiMaterial *mat, enum aiTextureType type,
       model->numTexturesLoaded++;
     }
   }
+  loggerDev("NUM TEXTURES '%d'", model->numTexturesLoaded);
 }
 
 void destroyModel(Model *model) {
